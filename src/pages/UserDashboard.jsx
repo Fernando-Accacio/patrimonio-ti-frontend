@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
+import { getSseUrl } from '../services/sse';
 import { LogOut, MonitorSmartphone, Send, Edit2, X } from 'lucide-react';
 
 export default function UserDashboard() {
@@ -21,11 +22,7 @@ export default function UserDashboard() {
   const [editingTicketId, setEditingTicketId] = useState(null);
   const [expandedTickets, setExpandedTickets] = useState({}); // Controla o "ver mais" do usuário
 
-  useEffect(() => {
-    carregarDados();
-  }, []);
-
-  const carregarDados = async () => {
+  const carregarDados = useCallback(async () => {
     try {
       const [tkResponse, eqResponse] = await Promise.all([
         api.get('/tickets/me'),
@@ -36,7 +33,34 @@ export default function UserDashboard() {
     } catch (error) {
       console.error("Erro ao carregar dados do portal:", error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    carregarDados();
+  }, [carregarDados]);
+
+  useEffect(() => {
+    const sse = new EventSource(getSseUrl());
+
+    sse.onmessage = (event) => {
+      try {
+        const payload = JSON.parse(event.data);
+        if (payload?.action === 'RELOAD_DATA') {
+          carregarDados();
+        }
+      } catch (error) {
+        console.error('Erro ao processar mensagem SSE do usuário:', error);
+      }
+    };
+
+    sse.onerror = (error) => {
+      console.error('Erro na conexão SSE do usuário:', error);
+    };
+
+    return () => {
+      sse.close();
+    };
+  }, [carregarDados]);
 
   const toggleExpandirChamado = (id) => {
     setExpandedTickets(prev => ({ ...prev, [id]: !prev[id] }));

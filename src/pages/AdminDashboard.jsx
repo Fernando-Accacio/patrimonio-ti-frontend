@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
+import { getSseUrl } from '../services/sse';
 import { LogOut, Monitor, Ticket, Wrench, CheckCircle, Plus, X, Users, LayoutDashboard, Trash2, AlertTriangle, Info } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -35,11 +36,7 @@ export default function AdminDashboard() {
   // Modal de Prompt (Input de Texto)
   const [promptModal, setPromptModal] = useState({ show: false, title: '', placeholder: '', inputValue: '', onConfirm: null, ticketData: null });
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const [eqResponse, tkResponse, usResponse] = await Promise.all([
         api.get('/equipments'),
@@ -54,7 +51,34 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  useEffect(() => {
+    const sse = new EventSource(getSseUrl());
+
+    sse.onmessage = (event) => {
+      try {
+        const payload = JSON.parse(event.data);
+        if (payload?.action === 'RELOAD_DATA') {
+          fetchData();
+        }
+      } catch (error) {
+        console.error('Erro ao processar mensagem SSE do admin:', error);
+      }
+    };
+
+    sse.onerror = (error) => {
+      console.error('Erro na conexão SSE do admin:', error);
+    };
+
+    return () => {
+      sse.close();
+    };
+  }, [fetchData]);
 
   const handleLogout = () => {
     logoutContext();
