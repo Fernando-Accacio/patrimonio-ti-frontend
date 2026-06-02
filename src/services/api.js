@@ -1,10 +1,10 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:3333/api',
+  baseURL: 'http://localhost:3333/api', 
 });
 
-// Interceptor de Requisição
+// Interceptor de Requisição (Manda o Token)
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('@PatrimonioTI:token');
   if (token) {
@@ -13,14 +13,14 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Interceptor de Resposta
+// Interceptor de Resposta (Escuta a Invalidação)
 api.interceptors.response.use(
   (response) => {
     return response;
   },
   (error) => {
-    // CORREÇÃO: Se der 401, MAS NÃO FOR a rota de login, aí sim ele desloga a pessoa.
-    if (error.response && error.response.status === 401 && !error.config.url.includes('/login')) {
+    // BLINDAGEM: As interrogações garantem que, se a internet cair ou o backend estiver desligado, o React não crashe.
+    if (error.response && error.response.status === 401 && !error.config?.url?.includes('/login')) {
       localStorage.removeItem('@PatrimonioTI:token');
       localStorage.removeItem('@PatrimonioTI:user');
       window.location.href = '/'; 

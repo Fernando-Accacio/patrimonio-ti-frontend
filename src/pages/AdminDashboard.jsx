@@ -16,7 +16,7 @@ import GlobalModals from '../components/modals/GlobalModals';
 export default function AdminDashboard() {
   const { user, logoutContext } = useContext(AuthContext);
   const navigate = useNavigate();
-  const hook = useAdminDashboard(user, logoutContext, navigate); // <--- ATUALIZADO AQUI
+  const hook = useAdminDashboard(user, logoutContext, navigate);
 
   if (hook.loading) return <div className="min-h-screen flex items-center justify-center text-slate-500">Carregando painel Admin...</div>;
 
@@ -45,7 +45,7 @@ export default function AdminDashboard() {
             users={hook.usersList} currentUser={user} 
             onUpdateRole={(id, nome, role) => hook.setConfirmModal({ show: true, title: 'Alterar Cargo', message: `Alterar cargo de "${nome}" para ${role}?`, onConfirm: async () => { await api.patch(`/users/${id}/role`, { role }); hook.fetchData(); } })} 
             onDelete={(id, nome) => hook.setConfirmModal({ show: true, title: 'Remover Acesso', message: `Remover o servidor "${nome}"?`, onConfirm: async () => { await api.delete(`/users/${id}`); hook.fetchData(); } })}
-            onResetPasswordClick={(selUser) => hook.setPromptModal({ show: true, title: `Nova Senha para ${selUser.nome}`, placeholder: 'Senha...', inputValue: '', isPassword: true, onConfirm: async (pass) => { await api.patch(`/users/${selUser.id}/password`, { novaSenha: pass }); hook.showAlert('Sucesso', 'Senha alterada!', 'success'); } })}
+            // ALTERADO: onResetPasswordClick foi completamente banido daqui!
           />
         )}
       </main>

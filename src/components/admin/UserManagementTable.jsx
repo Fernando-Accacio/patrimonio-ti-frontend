@@ -1,56 +1,69 @@
 import React from 'react';
-import { Trash2, Key } from 'lucide-react';
+import { Trash2, ShieldCheck, UserCog } from 'lucide-react';
 
-export default function UserManagementTable({ users, currentUser, onUpdateRole, onDelete, onResetPasswordClick }) {
-  
+export default function UserManagementTable({ users, currentUser, onUpdateRole, onDelete }) {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-      <h2 className="text-lg font-bold text-slate-800 mb-4 border-b pb-2">Controle de Acesso dos Servidores</h2>
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="bg-slate-50 px-6 py-4 border-b">
+        <h2 className="text-lg font-bold text-slate-800">Controle de Acesso</h2>
+        <p className="text-sm text-slate-500">Gerencie os níveis de permissão dos servidores do sistema.</p>
+      </div>
+
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm text-slate-600">
-          <thead className="bg-slate-50 text-slate-700 font-medium border-b">
+          <thead className="bg-slate-50 text-slate-700 font-medium border-b text-xs uppercase tracking-wider">
             <tr>
-              <th className="py-3 px-4">Nome Funcionário</th>
-              <th className="py-3 px-4">E-mail Institucional</th>
-              <th className="py-3 px-4">Nível de Acesso (Role)</th>
-              <th className="py-3 px-4 text-center">Ações</th>
+              <th className="py-3 px-6">Servidor</th>
+              <th className="py-3 px-6">E-mail Institucional</th>
+              <th className="py-3 px-6">Nível de Acesso</th>
+              <th className="py-3 px-6 text-center">Ações</th>
             </tr>
           </thead>
-          <tbody>
-            {users.map((us) => (
-              <tr key={us.id} className="border-b hover:bg-slate-50">
-                <td className="py-3 px-4 font-semibold text-slate-800">{us.nome}</td>
-                <td className="py-3 px-4">{us.email}</td>
-                <td className="py-3 px-4">
-                  <select 
-                    value={us.role}
-                    disabled={us.id === currentUser?.id}
-                    onChange={(e) => onUpdateRole(us.id, us.nome, e.target.value)}
-                    className={`px-2 py-1 rounded font-bold text-xs border cursor-pointer focus:ring-2 focus:ring-blue-500 outline-none ${
-                      us.role === 'ADMIN' ? 'text-purple-700 border-purple-200 bg-purple-50' : 'text-blue-700 border-blue-200 bg-blue-50'
-                    } disabled:opacity-60 disabled:cursor-not-allowed`}
-                  >
-                    <option value="USER">USER (Funcionário)</option>
-                    <option value="ADMIN">ADMIN (Suporte TI)</option>
-                  </select>
+          <tbody className="divide-y divide-slate-100">
+            {users.map((u) => (
+              <tr key={u.id} className="hover:bg-slate-50 transition">
+                <td className="py-4 px-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">
+                      {u.nome.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="font-semibold text-slate-800">{u.nome} {u.id === currentUser?.id && '(Você)'}</span>
+                  </div>
                 </td>
-                <td className="py-3 px-4 flex justify-center gap-4">
-                  <button
-                    onClick={() => onResetPasswordClick(us)}
-                    className="text-amber-600 hover:text-amber-800 p-1 rounded transition cursor-pointer"
-                    title="Alterar senha deste usuário"
-                  >
-                    <Key className="w-5 h-5" />
-                  </button>
-
-                  <button 
-                    onClick={() => onDelete(us.id, us.nome)}
-                    className="text-red-600 hover:text-red-800 p-1 rounded transition disabled:opacity-40 cursor-pointer"
-                    disabled={us.id === currentUser?.id}
-                    title="Remover acesso"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+                <td className="py-4 px-6">{u.email}</td>
+                <td className="py-4 px-6">
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                    u.role === 'ADMIN' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                  }`}>
+                    {u.role === 'ADMIN' ? <ShieldCheck className="w-3 h-3" /> : <UserCog className="w-3 h-3" />}
+                    {u.role}
+                  </span>
+                </td>
+                <td className="py-4 px-6">
+                  <div className="flex items-center justify-center gap-2">
+                    {u.id !== currentUser?.id ? (
+                      <>
+                        <select
+                          value={u.role}
+                          onChange={(e) => onUpdateRole(u.id, u.nome, e.target.value)}
+                          className="text-xs border border-slate-300 rounded px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                        >
+                          <option value="USER">Tornar Usuário</option>
+                          <option value="ADMIN">Tornar Admin</option>
+                        </select>
+                        
+                        <button
+                          onClick={() => onDelete(u.id, u.nome)}
+                          className="p-1.5 text-slate-400 hover:text-red-600 transition cursor-pointer"
+                          title="Remover Acesso"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </>
+                    ) : (
+                      <span className="text-xs text-slate-400 italic">Conta Ativa</span>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}

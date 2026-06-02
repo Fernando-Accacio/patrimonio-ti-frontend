@@ -14,16 +14,15 @@ export function useAuthForm() {
   const navigate = useNavigate();
   const { loginContext } = useContext(AuthContext);
 
-  // Função tradutora de erros do Fastify
   const tratarErroApi = (error) => {
     const resData = error.response?.data;
     if (resData) {
       if (resData.error === 'Bad Request') {
-        return 'Verifique se o formato do e-mail é válido e se não há campos vazios.';
+        return 'Verifique se os dados estão corretos e não há campos vazios.';
       }
       return resData.error || resData.message || 'Erro ao conectar com o servidor.';
     }
-    return 'Erro ao conectar com o servidor. Tente novamente mais tarde.';
+    return 'Erro de conexão. Verifique se o servidor está rodando.';
   };
 
   const handleLogin = async (e) => {
@@ -34,7 +33,6 @@ export function useAuthForm() {
       loginContext(response.data.token, response.data.user);
       navigate(response.data.user.role === 'ADMIN' ? '/admin' : '/user');
     } catch (error) {
-      // Usa o nosso tradutor de erros
       setErro(tratarErroApi(error));
     }
   };
@@ -43,11 +41,11 @@ export function useAuthForm() {
     e.preventDefault();
     setErro(''); setSucesso(false);
     try {
-      await api.post('/register', { nome, email, senha, role: 'USER' });
+      await api.post('/register', { nome, email, role: 'USER' });
       setSucesso(true);
-      setTimeout(() => navigate('/'), 2000);
+      // ALTERADO: Agora aguarda 10 segundos na tela para o usuário ler com calma
+      setTimeout(() => navigate('/'), 10000);
     } catch (error) {
-      // Usa o nosso tradutor de erros
       setErro(tratarErroApi(error));
     }
   };
