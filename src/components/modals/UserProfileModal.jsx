@@ -1,15 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, User, KeyRound, Lock, Eye, EyeOff } from 'lucide-react';
 import api from '../../services/api';
 
 export default function UserProfileModal({ show, onClose, user, onSuccess }) {
   const [activeTab, setActiveTab] = useState('perfil'); 
   const [novaSenha, setNovaSenha] = useState('');
-  const [confirmarSenha, setConfirmarSenha] = useState(''); // NOVO: Estado para segunda senha
+  const [confirmarSenha, setConfirmarSenha] = useState('');
   const [showPassword, setShowPassword] = useState(false); 
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // NOVO: Olhinho da segunda senha
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState('');
+
+  // NOVO: O "Faxineiro" do React! Sempre que o modal fechar, ele limpa tudo.
+  useEffect(() => {
+    if (!show) {
+      setNovaSenha('');
+      setConfirmarSenha('');
+      setErro('');
+      setActiveTab('perfil');
+      setShowPassword(false);
+      setShowConfirmPassword(false);
+    }
+  }, [show]);
 
   if (!show) return null;
 
@@ -19,7 +31,6 @@ export default function UserProfileModal({ show, onClose, user, onSuccess }) {
 
     setErro('');
 
-    // VALIDAÇÃO: Verifica se as duas senhas são rigorosamente iguais
     if (novaSenha !== confirmarSenha) {
       setErro('A nova senha e a confirmação não coincidem. Verifique a digitação.');
       return;
@@ -29,11 +40,7 @@ export default function UserProfileModal({ show, onClose, user, onSuccess }) {
     try {
       await api.patch('/users/me/password', { novaSenha });
       onSuccess('Senha alterada com sucesso!');
-      setNovaSenha('');
-      setConfirmarSenha('');
-      setShowPassword(false);
-      setShowConfirmPassword(false);
-      onClose();
+      onClose(); // O useEffect ali de cima vai se encarregar de limpar os campos!
     } catch (err) {
       setErro(err.response?.data?.error || 'Erro ao processar alteração.');
     } finally {
@@ -84,7 +91,6 @@ export default function UserProfileModal({ show, onClose, user, onSuccess }) {
             </>
           ) : (
             <>
-              {/* CAMPO 1: NOVA SENHA */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Nova Senha de Acesso</label>
                 <div className="relative">
@@ -108,7 +114,6 @@ export default function UserProfileModal({ show, onClose, user, onSuccess }) {
                 </div>
               </div>
 
-              {/* CAMPO 2: CONFIRMAR NOVA SENHA */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Repita a Nova Senha</label>
                 <div className="relative">
