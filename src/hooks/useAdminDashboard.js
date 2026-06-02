@@ -6,6 +6,8 @@ export function useAdminDashboard(user, logoutContext, navigate) {
   const [equipments, setEquipments] = useState([]);
   const [tickets, setTickets] = useState([]);
   const [usersList, setUsersList] = useState([]);
+  const [resetRequests, setResetRequests] = useState([]); 
+  const [resetHistory, setResetHistory] = useState([]); // NOVO: Estado para histórico de senhas
   const [loading, setLoading] = useState(true);
   
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -20,14 +22,18 @@ export function useAdminDashboard(user, logoutContext, navigate) {
 
   const fetchData = useCallback(async () => {
     try {
-      const [eqResponse, tkResponse, usResponse] = await Promise.all([
+      const [eqResponse, tkResponse, usResponse, resetResponse, historyResponse] = await Promise.all([
         api.get('/equipments'),
         api.get('/tickets'),
-        api.get('/users')
+        api.get('/users'),
+        api.get('/password-resets').catch(() => ({ data: [] })),
+        api.get('/password-resets/history').catch(() => ({ data: [] })) // NOVO: Busca do histórico
       ]);
       setEquipments(eqResponse.data);
       setTickets(tkResponse.data);
       setUsersList(usResponse.data);
+      setResetRequests(resetResponse.data);
+      setResetHistory(historyResponse.data); // NOVO: Salva histórico
     } catch (error) {
       console.error("Erro ao buscar dados:", error);
     } finally {
@@ -43,7 +49,6 @@ export function useAdminDashboard(user, logoutContext, navigate) {
       const payload = JSON.parse(e.data);
       if (payload?.action === 'RELOAD_DATA') fetchData();
       
-      // ESCUTA O GRITO DO BACKEND PARA DESLOGAR
       if (payload?.action === 'FORCE_LOGOUT' && payload.userId === user?.id) {
         alert('Sua sessão foi modificada ou encerrada pelo administrador.');
         logoutContext();
@@ -55,11 +60,29 @@ export function useAdminDashboard(user, logoutContext, navigate) {
 
   const showAlert = (title, message, type = 'info') => setAlertModal({ show: true, title, message, type });
 
+  const handleAprovarReset = async (id) => {
+    try {
+      await api.post(`/password-resets/${id}/approve`);
+      showAlert('Sucesso', 'Solicitação aprovada! Nova senha gerada com sucesso.', 'success');
+      fetchData();
+    } catch (err) {
+      showAlert('Erro', err.response?.data?.error || 'Erro ao aprovar reset.', 'error');
+    }
+  };
+
+  const handleRecusarReset = async (id) => {
+    try {
+      await api.post(`/password-resets/${id}/reject`);
+      showAlert('Sucesso', 'Solicitação recusada com sucesso.', 'success');
+      fetchData();
+    } catch (err) {
+      showAlert('Erro', err.response?.data?.error || 'Erro ao recusar reset.', 'error');
+    }
+  };
+
   const handleDeletarEquipamentoManual = (id, patrimonio) => {
     setConfirmModal({
-      show: true,
-      title: 'Remover Patrimônio',
-      message: `Tem certeza que deseja remover o equipamento de patrimônio número ${patrimonio}? O histórico de chamados continuará salvo.`,
+      show: true, title: 'Remover Patrimônio', message: `Tem certeza que deseja remover o equipamento de patrimônio número ${patrimonio}?`,
       onConfirm: async () => {
         try {
           await api.delete(`/equipments/${id}`);
@@ -114,9 +137,9 @@ export function useAdminDashboard(user, logoutContext, navigate) {
   };
 
   return {
-    equipments, tickets, usersList, loading, activeTab, setActiveTab, statusFilter, setStatusFilter,
+    equipments, tickets, usersList, resetRequests, resetHistory, loading, activeTab, setActiveTab, statusFilter, setStatusFilter,
     showModal, setShowModal, showProfileModal, setShowProfileModal, novoEq, setNovoEq,
     alertModal, setAlertModal, confirmModal, setConfirmModal, promptModal, setPromptModal,
-    handleDeletarEquipamentoManual, handleAlterarStatusChamado, handleCadastrarEquipamento, showAlert, fetchData
+    handleDeletarEquipamentoManual, handleAlterarStatusChamado, handleCadastrarEquipamento, handleAprovarReset, handleRecusarReset, showAlert, fetchData
   };
 }

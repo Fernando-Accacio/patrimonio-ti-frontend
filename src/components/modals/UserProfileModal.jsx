@@ -5,7 +5,9 @@ import api from '../../services/api';
 export default function UserProfileModal({ show, onClose, user, onSuccess }) {
   const [activeTab, setActiveTab] = useState('perfil'); 
   const [novaSenha, setNovaSenha] = useState('');
+  const [confirmarSenha, setConfirmarSenha] = useState(''); // NOVO: Estado para segunda senha
   const [showPassword, setShowPassword] = useState(false); 
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // NOVO: Olhinho da segunda senha
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState('');
 
@@ -15,12 +17,22 @@ export default function UserProfileModal({ show, onClose, user, onSuccess }) {
     e.preventDefault();
     if (activeTab === 'perfil') return;
 
-    setLoading(true); setErro('');
+    setErro('');
+
+    // VALIDAÇÃO: Verifica se as duas senhas são rigorosamente iguais
+    if (novaSenha !== confirmarSenha) {
+      setErro('A nova senha e a confirmação não coincidem. Verifique a digitação.');
+      return;
+    }
+
+    setLoading(true);
     try {
       await api.patch('/users/me/password', { novaSenha });
       onSuccess('Senha alterada com sucesso!');
       setNovaSenha('');
+      setConfirmarSenha('');
       setShowPassword(false);
+      setShowConfirmPassword(false);
       onClose();
     } catch (err) {
       setErro(err.response?.data?.error || 'Erro ao processar alteração.');
@@ -30,7 +42,6 @@ export default function UserProfileModal({ show, onClose, user, onSuccess }) {
   };
 
   return (
-    // CORREÇÃO: Removido o 'backdrop-blur-sm' e alterado para 'bg-slate-900/60' para acabar com o lag de digitação
     <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-[70] p-4 transition-opacity">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
         
@@ -40,16 +51,16 @@ export default function UserProfileModal({ show, onClose, user, onSuccess }) {
         </div>
 
         <div className="flex border-b text-sm font-medium">
-          <button onClick={() => { setActiveTab('perfil'); setErro(''); }} className={`flex-1 py-3 flex items-center justify-center gap-2 cursor-pointer transition ${activeTab === 'perfil' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}>
+          <button type="button" onClick={() => { setActiveTab('perfil'); setErro(''); }} className={`flex-1 py-3 flex items-center justify-center gap-2 cursor-pointer transition ${activeTab === 'perfil' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}>
             <User className="w-4 h-4" /> Dados Pessoais
           </button>
-          <button onClick={() => { setActiveTab('senha'); setErro(''); }} className={`flex-1 py-3 flex items-center justify-center gap-2 cursor-pointer transition ${activeTab === 'senha' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}>
+          <button type="button" onClick={() => { setActiveTab('senha'); setErro(''); }} className={`flex-1 py-3 flex items-center justify-center gap-2 cursor-pointer transition ${activeTab === 'senha' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}>
             <KeyRound className="w-4 h-4" /> Segurança
           </button>
         </div>
 
         <form onSubmit={handleSalvar} className="p-6 space-y-4">
-          {erro && <div className="p-3 bg-red-100 text-red-700 text-sm rounded">{erro}</div>}
+          {erro && <div className="p-3 bg-red-100 text-red-700 text-sm rounded font-medium">{erro}</div>}
           
           {activeTab === 'perfil' ? (
             <>
@@ -73,6 +84,7 @@ export default function UserProfileModal({ show, onClose, user, onSuccess }) {
             </>
           ) : (
             <>
+              {/* CAMPO 1: NOVA SENHA */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Nova Senha de Acesso</label>
                 <div className="relative">
@@ -94,7 +106,31 @@ export default function UserProfileModal({ show, onClose, user, onSuccess }) {
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
-                <span className="text-[10px] text-slate-400 mt-1.5 block leading-tight">Dica: Use letras, números e símbolos para uma senha mais segura.</span>
+              </div>
+
+              {/* CAMPO 2: CONFIRMAR NOVA SENHA */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Repita a Nova Senha</label>
+                <div className="relative">
+                  <input 
+                    type={showConfirmPassword ? 'text' : 'password'} 
+                    required 
+                    minLength={6} 
+                    maxLength={50} 
+                    placeholder="Confirme a mesma senha" 
+                    className="w-full px-3 py-2 pr-10 border rounded-lg focus:ring-2 focus:ring-blue-600 outline-none text-sm transition" 
+                    value={confirmarSenha} 
+                    onChange={(e) => setConfirmarSenha(e.target.value)} 
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition cursor-pointer"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                <span className="text-[10px] text-slate-400 mt-1.5 block leading-tight">A alteração exige que as duas caixas de texto contenham exatamente os mesmos caracteres.</span>
               </div>
 
               <div className="pt-4 flex gap-3">
