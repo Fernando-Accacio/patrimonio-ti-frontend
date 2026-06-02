@@ -15,7 +15,7 @@ export default function EquipmentFormModal({ show, onClose, onSubmit, novoEq, se
         </div>
         <form onSubmit={onSubmit} className="p-6 space-y-4">
           <div>
-            {/* CORREÇÃO: Label e maxLength atualizados para 7 dígitos */}
+            {/* CORREÇÃO: Atualizado para 7 dígitos */}
             <label className="block text-sm font-medium text-slate-700 mb-1">Nº do Patrimônio (7 Dígitos)</label>
             <input 
               type="text" required maxLength={7} placeholder="Ex: 4658522"

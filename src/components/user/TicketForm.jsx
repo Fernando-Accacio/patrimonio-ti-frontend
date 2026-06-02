@@ -1,5 +1,5 @@
 import React from 'react';
-import { Send, X, ChevronDown } from 'lucide-react'; // Importado o ChevronDown
+import { Send, X, ChevronDown } from 'lucide-react'; // ChevronDown importado
 
 export default function TicketForm({ 
   editingTicketId, onCancel, onSubmit, mensagem, 
@@ -25,6 +25,7 @@ export default function TicketForm({
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Nº do Patrimônio (P.M.I.S)</label>
+          {/* CORREÇÃO: Aceita até 7 dígitos */}
           <input 
             type="text" required maxLength={7} placeholder="Ex: 4658599"
             className="w-full px-3 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-600 outline-none text-sm transition"
@@ -35,11 +36,10 @@ export default function TicketForm({
         
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Tipo do Equipamento</label>
-          {/* Container relativo criado para controlar a posição da nova seta */}
+          {/* CORREÇÃO VISUAL: Estilização para mover a flechinha para a esquerda */}
           <div className="relative">
             <select 
               required 
-              // Adicionado 'appearance-none' para sumir com a seta antiga e 'pr-10' para o texto não sobrepor o ícone
               className="w-full px-3 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-600 outline-none bg-white appearance-none pr-10 text-sm transition cursor-pointer"
               value={tipo} 
               onChange={(e) => setTipo(e.target.value)}
@@ -54,7 +54,7 @@ export default function TicketForm({
               <option value="Outro">Outro</option>
             </select>
             
-            {/* Nova flechinha customizada jogada mais para a esquerda com 'right-4' */}
+            {/* Seta customizada com folga à direita */}
             <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
               <ChevronDown className="w-4 h-4" />
             </div>
