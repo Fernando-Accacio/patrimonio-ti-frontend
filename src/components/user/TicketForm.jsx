@@ -1,9 +1,10 @@
 import React from 'react';
-import { Send, X, ChevronDown } from 'lucide-react'; // ChevronDown importado
+import { Send, X, ChevronDown, Wrench } from 'lucide-react'; 
 
 export default function TicketForm({ 
-  editingTicketId, onCancel, onSubmit, mensagem, 
-  patrimonio, setPatrimonio, tipo, setTipo, localizacao, setLocalizacao, descricao, setDescricao 
+  editingTicketId, onCancel, onSubmit, 
+  patrimonio, setPatrimonio, tipo, setTipo, localizacao, setLocalizacao, descricao, setDescricao,
+  tecnicosDisponiveis, tecnicoIdSelecionado, setTecnicoIdSelecionado // NOVAS PROPS AQUI
 }) {
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-fit">
@@ -15,17 +16,10 @@ export default function TicketForm({
           </button>
         )}
       </h2>
-      
-      {mensagem.texto && (
-        <div className={`mb-4 p-3 rounded text-sm ${mensagem.tipo === 'sucesso' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-          {mensagem.texto}
-        </div>
-      )}
 
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Nº do Patrimônio (P.M.I.S)</label>
-          {/* CORREÇÃO: Aceita até 7 dígitos */}
           <input 
             type="text" required maxLength={7} placeholder="Ex: 4658599"
             className="w-full px-3 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-600 outline-none text-sm transition"
@@ -36,7 +30,6 @@ export default function TicketForm({
         
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Tipo do Equipamento</label>
-          {/* CORREÇÃO VISUAL: Estilização para mover a flechinha para a esquerda */}
           <div className="relative">
             <select 
               required 
@@ -53,8 +46,6 @@ export default function TicketForm({
               <option value="Projetor">Projetor</option>
               <option value="Outro">Outro</option>
             </select>
-            
-            {/* Seta customizada com folga à direita */}
             <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
               <ChevronDown className="w-4 h-4" />
             </div>
@@ -79,10 +70,35 @@ export default function TicketForm({
           />
         </div>
 
-        <button type="submit" className={`w-full text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-2 transition cursor-pointer ${
+        {/* NOVO CAMPO: ESCOLHER O TÉCNICO DE PREFERÊNCIA */}
+        <div className="bg-slate-50 p-3 border border-slate-200 rounded-lg">
+          <label className="flex items-center gap-2 text-sm font-bold text-slate-700 mb-2">
+            <Wrench className="w-4 h-4 text-blue-600" /> Atendimento Preferencial
+          </label>
+          <div className="relative">
+            <select 
+              className="w-full px-3 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-600 outline-none bg-white appearance-none pr-10 text-xs transition cursor-pointer"
+              value={tecnicoIdSelecionado} 
+              onChange={(e) => setTecnicoIdSelecionado(e.target.value)}
+            >
+              <option value="">Nenhuma preferência (Aguardar Fila Geral)</option>
+              {tecnicosDisponiveis?.map(tec => (
+                <option key={tec.id} value={tec.id}>{tec.nome}</option>
+              ))}
+            </select>
+            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
+              <ChevronDown className="w-4 h-4" />
+            </div>
+          </div>
+          <p className="text-[10px] text-slate-400 mt-2 leading-tight">
+            Se você já tratou deste caso com algum técnico específico, selecione-o aqui para rotear o chamado diretamente.
+          </p>
+        </div>
+
+        <button type="submit" className={`w-full text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition cursor-pointer shadow-sm ${
           editingTicketId ? 'bg-orange-600 hover:bg-orange-700' : 'bg-blue-600 hover:bg-blue-700'
         }`}>
-          <Send className="w-4 h-4" /> {editingTicketId ? 'Salvar Alterações' : 'Enviar para a TI'}
+          <Send className="w-4 h-4" /> {editingTicketId ? 'Salvar Alterações' : 'Enviar Solicitação para a TI'}
         </button>
       </form>
     </div>

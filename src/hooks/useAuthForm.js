@@ -17,9 +17,7 @@ export function useAuthForm() {
   const tratarErroApi = (error) => {
     const resData = error.response?.data;
     if (resData) {
-      if (resData.error === 'Bad Request') {
-        return 'Verifique se os dados estão corretos e não há campos vazios.';
-      }
+      if (resData.error === 'Bad Request') return 'Verifique se os dados estão corretos e não há campos vazios.';
       return resData.error || resData.message || 'Erro ao conectar com o servidor.';
     }
     return 'Erro de conexão. Verifique se o servidor está rodando.';
@@ -31,7 +29,16 @@ export function useAuthForm() {
     try {
       const response = await api.post('/login', { email, senha });
       loginContext(response.data.token, response.data.user);
-      navigate(response.data.user.role === 'ADMIN' ? '/admin' : '/user');
+      
+      // NOVO: Roteamento de trânsito inteligente para os 3 perfis!
+      const role = response.data.user.role;
+      if (role === 'ADMIN') {
+        navigate('/admin');
+      } else if (role === 'TECH') {
+        navigate('/tech');
+      } else {
+        navigate('/user');
+      }
     } catch (error) {
       setErro(tratarErroApi(error));
     }
@@ -43,7 +50,6 @@ export function useAuthForm() {
     try {
       await api.post('/register', { nome, email, role: 'USER' });
       setSucesso(true);
-      // ALTERADO: Agora aguarda 10 segundos na tela para o usuário ler com calma
       setTimeout(() => navigate('/'), 10000);
     } catch (error) {
       setErro(tratarErroApi(error));

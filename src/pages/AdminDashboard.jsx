@@ -12,6 +12,8 @@ import UserManagementTable from '../components/admin/UserManagementTable';
 import EquipmentFormModal from '../components/modals/EquipmentFormModal';
 import UserProfileModal from '../components/modals/UserProfileModal';
 import GlobalModals from '../components/modals/GlobalModals';
+import UserFormModal from '../components/modals/UserFormModal';
+import { CheckCircle2, AlertCircle, X } from 'lucide-react'; // Ícones para o Toast
 
 export default function AdminDashboard() {
   const { user, logoutContext } = useContext(AuthContext);
@@ -21,7 +23,7 @@ export default function AdminDashboard() {
   if (hook.loading) return <div className="min-h-screen flex items-center justify-center text-slate-500">Carregando painel Admin...</div>;
 
   return (
-    <div className="min-h-screen bg-slate-100 relative">
+    <div className="min-h-screen bg-slate-100 relative overflow-hidden">
       <Header title="Patrimônio TI - Painel Suporte" user={user} onLogout={() => { logoutContext(); navigate('/'); }} onEditProfileClick={() => hook.setShowProfileModal(true)} />
       
       <div className="bg-white border-b shadow-sm">
@@ -42,10 +44,10 @@ export default function AdminDashboard() {
         )}
         
         {hook.activeTab === 'usuarios' && (
-          <UserManagementTable 
+          <UserManagementTable onAddClick={() => hook.setShowUserModal(true)}
             users={hook.usersList} currentUser={user} 
-            onUpdateRole={(id, nome, role) => hook.setConfirmModal({ show: true, title: 'Alterar Cargo', message: `Alterar cargo de "${nome}" para ${role}?`, onConfirm: async () => { await api.patch(`/users/${id}/role`, { role }); hook.fetchData(); } })} 
-            onDelete={(id, nome) => hook.setConfirmModal({ show: true, title: 'Remover Acesso', message: `Remover o servidor "${nome}"?`, onConfirm: async () => { await api.delete(`/users/${id}`); hook.fetchData(); } })}
+            onUpdateRole={(id, nome, role) => hook.setConfirmModal({ show: true, title: 'Alterar Cargo', message: `Alterar cargo de "${nome}" para ${role}?`, onConfirm: async () => { await api.patch(`/users/${id}/role`, { role }); hook.showToast('Cargo atualizado!', 'success'); hook.fetchData(); } })} 
+            onDelete={(id, nome) => hook.setConfirmModal({ show: true, title: 'Remover Acesso', message: `Remover o servidor "${nome}"?`, onConfirm: async () => { await api.delete(`/users/${id}`); hook.showToast('Usuário removido.', 'success'); hook.fetchData(); } })}
           />
         )}
 
@@ -136,10 +138,35 @@ export default function AdminDashboard() {
           </>
         )}
       </main>
-
+      
+      {/* Modais */}
+      <UserFormModal show={hook.showUserModal} onClose={() => hook.setShowUserModal(false)} onSubmit={hook.handleCadastrarUsuario} novoUser={hook.novoUser} setNovoUser={hook.setNovoUser} />
       <EquipmentFormModal show={hook.showModal} onClose={() => hook.setShowModal(false)} onSubmit={hook.handleCadastrarEquipamento} novoEq={hook.novoEq} setNovoEq={hook.setNovoEq} />
-      <UserProfileModal show={hook.showProfileModal} onClose={() => hook.setShowProfileModal(false)} user={user} onSuccess={(msg) => hook.showAlert('Sucesso', msg, 'success')} />
-      <GlobalModals alertModal={hook.alertModal} setAlertModal={hook.setAlertModal} confirmModal={hook.confirmModal} setConfirmModal={hook.setConfirmModal} promptModal={hook.promptModal} setPromptModal={hook.setPromptModal} />
+      <UserProfileModal show={hook.showProfileModal} onClose={() => hook.setShowProfileModal(false)} user={user} onSuccess={(msg) => hook.showToast(msg, 'success')} />
+      <GlobalModals 
+        alertModal={{ show: false, title: '', message: '' }} 
+        setAlertModal={() => {}} 
+        confirmModal={hook.confirmModal} 
+        setConfirmModal={hook.setConfirmModal} 
+        promptModal={hook.promptModal} 
+        setPromptModal={hook.setPromptModal} 
+      />
+      
+      {/* TOAST FLUTUANTE SUBSTITUINDO O ALERT */}
+      {hook.toast.show && (
+        <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-4 rounded-lg shadow-2xl text-white font-medium text-sm animate-in slide-in-from-bottom-8 fade-in duration-300 ${
+          hook.toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'
+        }`}>
+          {hook.toast.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+          <span>{hook.toast.message}</span>
+          <button 
+            onClick={() => hook.setToast({ ...hook.toast, show: false })}
+            className="ml-2 text-white/70 hover:text-white transition cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

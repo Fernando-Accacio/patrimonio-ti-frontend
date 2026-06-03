@@ -2,9 +2,10 @@ import React, { useContext } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './context/AuthContext';
 import Login from './pages/Login';
-import Register from './pages/Register'; // <-- FALTAVA ESSA IMPORTAÇÃO
+import Register from './pages/Register'; 
 import UserDashboard from './pages/UserDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import TechDashboard from './pages/TechDashboard'; // NOVO: Importando a tela do técnico
 
 // O Segurança da Porta
 const PrivateRoute = ({ children, roleRequired }) => {
@@ -14,7 +15,7 @@ const PrivateRoute = ({ children, roleRequired }) => {
   
   if (!authenticated) return <Navigate to="/" />;
   
-  // Se a rota exige ser ADMIN e o cara for USER comum, chuta ele pro login
+  // Se a rota exige um perfil específico e o usuário não bater, manda de volta
   if (roleRequired && user?.role !== roleRequired) return <Navigate to="/" />;
 
   return children;
@@ -25,11 +26,11 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* ROTAS PÚBLICAS (Acessíveis sem login) */}
+          {/* ROTAS PÚBLICAS */}
           <Route path="/" element={<Login />} />
-          <Route path="/register" element={<Register />} /> {/* <-- FALTAVA ESSA ROTA */}
+          <Route path="/register" element={<Register />} /> 
           
-          {/* ROTAS PRIVADAS / BLINDADAS */}
+          {/* ROTAS PRIVADAS */}
           <Route 
             path="/admin" 
             element={
@@ -39,6 +40,15 @@ function App() {
             } 
           />
           
+          <Route 
+            path="/tech" // NOVA ROTA EXCLUSIVA DE SUPORTE
+            element={
+              <PrivateRoute roleRequired="TECH">
+                <TechDashboard />
+              </PrivateRoute>
+            } 
+          />
+
           <Route 
             path="/user" 
             element={
