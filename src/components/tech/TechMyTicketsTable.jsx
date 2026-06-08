@@ -1,7 +1,7 @@
 import React from 'react';
 import { Wrench, Check, Trash2 } from 'lucide-react';
 
-export default function TechMyTicketsTable({ meusChamados, equipments, usersList, onAtualizarStatus }) {
+export default function TechMyTicketsTable({ meusChamados, equipments, onAtualizarStatus }) {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden animate-in fade-in duration-200">
       <div className="bg-blue-50/50 px-6 py-4 border-b flex items-center gap-3">
@@ -29,7 +29,6 @@ export default function TechMyTicketsTable({ meusChamados, equipments, usersList
             ) : (
               meusChamados.map((tk) => {
                 const eq = equipments.find(e => e.id === tk.equipment_id);
-                const solicitante = usersList.find(u => u.id === tk.user_id);
                 const dataDoChamado = tk.createdAt || tk.data_abertura; 
 
                 return (
@@ -37,9 +36,16 @@ export default function TechMyTicketsTable({ meusChamados, equipments, usersList
                     <td className="py-4 px-4 text-sm font-medium text-slate-500">
                       {dataDoChamado ? new Date(dataDoChamado).toLocaleString('pt-BR') : 'Sem data'}
                     </td>
-                    <td className="py-4 px-4 text-sm font-semibold text-slate-800">{solicitante?.nome || 'Removido'}</td>
                     
-                    {/* Célula corrigida aqui (Sem dupla TD) */}
+                    <td className="py-4 px-4">
+                      <span className="text-sm font-semibold text-slate-800 block">{tk.user?.nome || 'Removido'}</span>
+                      {tk.user?.ramal && (
+                        <span className="text-[11px] font-medium text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 inline-block mt-0.5">
+                          Ramal: {tk.user.ramal}
+                        </span>
+                      )}
+                    </td>
+
                     <td className="py-4 px-4">
                       <div className="flex items-center gap-1.5 whitespace-nowrap">
                         <span className="text-sm font-bold text-slate-700">{eq?.patrimonio || 'S/P'}</span>

@@ -19,7 +19,6 @@ export default function MyTicketsTableRow({
         {dataDoChamado ? new Date(dataDoChamado).toLocaleString('pt-BR') : 'Sem data'}
       </td>
       
-      {/* 🌟 CÉLULA ATUALIZADA COM O CLAN DA MUDANÇA: PATRIMÔNIO + TIPO */}
       <td className="py-3 px-3 pt-4">
         <div className="flex items-center gap-1.5 whitespace-nowrap">
           <span className="font-bold text-blue-600 text-sm">
@@ -54,14 +53,22 @@ export default function MyTicketsTableRow({
         )}
       </td>
       
+      {/* Coluna do Responsável atualizada para também mostrar o Ramal da TI se houver */}
       <td className="py-3 px-3 text-center pt-4">
         {nomeTecnico ? (
-          <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-bold ${
-            ticket.status_chamado === 'Cancelado' 
-              ? 'bg-slate-100 text-slate-500 border-slate-200' 
-              : 'bg-amber-50 text-amber-700 border-amber-200'
-          }`}>
-            <UserCircle className="w-3.5 h-3.5" /> {nomeTecnico}
+          <div className="flex flex-col items-center gap-0.5">
+            <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-bold ${
+              ticket.status_chamado === 'Cancelado' 
+                ? 'bg-slate-100 text-slate-500 border-slate-200' 
+                : 'bg-amber-50 text-amber-700 border-amber-200'
+            }`}>
+              <UserCircle className="w-3.5 h-3.5" /> {nomeTecnico}
+            </div>
+            {ticket.tecnico?.ramal && (
+              <span className="text-[10px] font-medium text-slate-400 block mt-0.5">
+                Ramal: {ticket.tecnico.ramal}
+              </span>
+            )}
           </div>
         ) : ticket.status_chamado === 'Cancelado' ? (
           <span className="text-xs text-slate-400 font-medium">—</span>
@@ -70,8 +77,9 @@ export default function MyTicketsTableRow({
         )}
       </td>
 
+      {/* 🌟 FIX: Aplicado 'whitespace-nowrap' no Badge para travar o alinhamento da tabela */}
       <td className="py-3 px-3 text-center pt-4">
-        <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${
+        <span className={`whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-bold border ${
           ticket.status_chamado === 'Concluído' ? 'bg-green-100 text-green-700 border-green-200' : 
           ticket.status_chamado === 'Baixa' ? 'bg-red-50 text-red-700 border-red-200' :
           ticket.status_chamado === 'Cancelado' ? 'bg-slate-200 text-slate-600 border-slate-300' : 

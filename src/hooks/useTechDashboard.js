@@ -82,7 +82,7 @@ export function useTechDashboard(user, logoutContext, navigate) {
 
   // NOSSOS FILTROS SEPARADOS
   const chamadosLivres = tickets.filter(tk => tk.tecnico_id === null && tk.status_chamado === 'Aberto');
-  const meusChamados = tickets.filter(tk => tk.tecnico_id === user?.id && tk.status_chamado === 'Aberto');
+  const meusChamados = tickets.filter(tk => tk.tecnico_id === user.id && tk.status_chamado === 'Em Andamento');
   
   // NOVO: Filtrando apenas os resolvidos pelo técnico logado, ordenados do mais recente pro mais antigo (Top 5)
   const historicoRecente = tickets
