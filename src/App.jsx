@@ -41,7 +41,7 @@ function App() {
           />
           
           <Route 
-            path="/tech" // NOVA ROTA EXCLUSIVA DE SUPORTE
+            path="/tech"
             element={
               <PrivateRoute roleRequired="TECH">
                 <TechDashboard />

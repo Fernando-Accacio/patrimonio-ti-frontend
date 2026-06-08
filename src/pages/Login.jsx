@@ -24,7 +24,19 @@ export default function Login() {
       setResetSuccess(true);
       setResetEmail('');
     } catch (err) {
-      setResetError(err.response?.data?.error || 'Erro ao enviar solicitação. Verifique o e-mail.');
+      const erroApi = err.response?.data?.error;
+      let erroAmigavel = 'Erro ao enviar solicitação. Verifique o e-mail.';
+
+      // Tradutor de erros técnicos para humanos
+      if (erroApi === 'Bad Request' || erroApi === 'Validation error') {
+        erroAmigavel = 'Formato de e-mail inválido. Verifique se você digitou corretamente.';
+      } else if (erroApi === 'User not found' || erroApi === 'Usuário não encontrado') {
+        erroAmigavel = 'Nenhum servidor encontrado com este endereço de e-mail.';
+      } else if (erroApi) {
+        erroAmigavel = erroApi; // Se o backend mandar um erro customizado, ele exibe
+      }
+
+      setResetError(erroAmigavel);
     } finally {
       setResetLoading(false);
     }

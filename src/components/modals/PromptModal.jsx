@@ -5,7 +5,7 @@ export default function PromptModal({ show, title, placeholder, inputValue, setI
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-[60] p-4 transition-opacity">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
         <div className="p-4 border-b bg-blue-50 border-blue-100 flex justify-between items-center">
           <h3 className="font-bold text-blue-800 flex items-center gap-2">

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Plus, Search, Trash2 } from 'lucide-react'; // Adicionado Trash2
+import { Plus, Search } from 'lucide-react';
+import EquipmentTableRow from './EquipmentTableRow'; // <-- IMPORTANDO A LINHA AQUI!
 
-export default function EquipmentTable({ equipments, onNewClick, onDeleteClick }) { // Adicionado onDeleteClick
+export default function EquipmentTable({ equipments, onNewClick, onDeleteClick }) {
   const [showAllEquipments, setShowAllEquipments] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -62,45 +63,16 @@ export default function EquipmentTable({ equipments, onNewClick, onDeleteClick }
               <th className="py-3 px-4">Origem do Cadastro</th>
               <th className="py-3 px-4">Status</th>
               <th className="py-3 px-4">Local / Observação</th>
-              <th className="py-3 px-4 text-center">Ações</th> {/* Nova Coluna */}
+              <th className="py-3 px-4 text-center">Ações</th>
             </tr>
           </thead>
           <tbody>
             {displayedEquipments.map((eq) => (
-              <tr key={eq.id} className="border-b hover:bg-slate-50">
-                <td className="py-3 px-4 font-semibold text-slate-800">{eq.patrimonio}</td>
-                <td className="py-3 px-4">{eq.tipo}</td>
-                
-                <td className="py-3 px-4">
-                  <span className={`px-2 py-1 rounded text-xs font-bold ${
-                    eq.criado_por === 'Admin (Manual)' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700'
-                  }`}>
-                    {eq.criado_por || 'Usuário (Via Chamado)'}
-                  </span>
-                </td>
-
-                <td className="py-3 px-4">
-                  <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                    eq.status === 'Disponível' ? 'bg-green-100 text-green-700' : 
-                    (eq.status === 'Em Manutenção' || eq.status === 'Aberto') ? 'bg-blue-100 text-blue-700' : 
-                    'bg-slate-200 text-slate-700'
-                  }`}>
-                    {eq.status === 'Em Manutenção' ? 'Aberto' : eq.status}
-                  </span>
-                </td>
-                <td className="py-3 px-4 truncate max-w-xs">{eq.observacao}</td>
-                
-                {/* BOTÃO DE EXCLUIR EQUIPAMENTO COM SOFT-DELETE */}
-                <td className="py-3 px-4 text-center">
-                  <button
-                    onClick={() => onDeleteClick(eq.id, eq.patrimonio)}
-                    className="text-red-600 hover:text-red-800 p-1 rounded transition cursor-pointer"
-                    title="Excluir Equipamento"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </td>
-              </tr>
+              <EquipmentTableRow 
+                key={eq.id} 
+                eq={eq} 
+                onDeleteClick={onDeleteClick} 
+              />
             ))}
           </tbody>
         </table>

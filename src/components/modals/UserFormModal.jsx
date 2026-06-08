@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { X, UserPlus, CreditCard } from 'lucide-react';
+import { X, UserPlus, Lightbulb } from 'lucide-react'; // <-- Lightbulb importado (removi o CreditCard que não estava em uso)
 
 export default function UserFormModal({ show, onClose, onSubmit, novoUser, setNovoUser }) {
   
@@ -77,8 +77,11 @@ export default function UserFormModal({ show, onClose, onSubmit, novoUser, setNo
             </select>
           </div>
 
-          <div className="bg-blue-50 text-blue-800 p-3 rounded-lg text-[11px] leading-relaxed border border-blue-100">
-            💡 <strong>Nota de Segurança:</strong> Ao concluir, o sistema associará os dados e gerará uma senha automática forte, mascarando o e-mail no banco por criptografia.
+          <div className="bg-blue-50 text-blue-800 p-3 rounded-lg text-[11px] leading-relaxed border border-blue-100 flex items-start gap-2">
+            <Lightbulb className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+            <div>
+              <strong>Nota de Segurança:</strong> Ao concluir, o sistema associará os dados e gerará uma senha automática forte, mascarando o e-mail no banco por criptografia.
+            </div>
           </div>
 
           <div className="pt-2 flex gap-3">
