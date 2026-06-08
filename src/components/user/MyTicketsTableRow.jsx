@@ -18,11 +18,21 @@ export default function MyTicketsTableRow({
       <td className="py-3 px-3 text-sm font-medium text-slate-500 pt-4">
         {dataDoChamado ? new Date(dataDoChamado).toLocaleString('pt-BR') : 'Sem data'}
       </td>
+      
+      {/* 🌟 CÉLULA ATUALIZADA COM O CLAN DA MUDANÇA: PATRIMÔNIO + TIPO */}
       <td className="py-3 px-3 pt-4">
-        <span className="font-bold text-blue-600 text-sm block">
-          {matchedEq ? matchedEq.patrimonio : `ID: ${ticket.equipment_id}`}
-        </span>
+        <div className="flex items-center gap-1.5 whitespace-nowrap">
+          <span className="font-bold text-blue-600 text-sm">
+            {matchedEq ? matchedEq.patrimonio : `ID: ${ticket.equipment_id}`}
+          </span>
+          {matchedEq?.tipo && (
+            <span className="text-xs font-medium text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+              {matchedEq.tipo}
+            </span>
+          )}
+        </div>
       </td>
+
       <td className="py-3 px-3 max-w-xs pt-4">
         <div className="text-slate-600 break-words text-sm leading-relaxed">
           {isExpanded ? ticket.descricao_problema : ticket.descricao_problema.length > 50 ? `${ticket.descricao_problema.substring(0, 50)}...` : ticket.descricao_problema}

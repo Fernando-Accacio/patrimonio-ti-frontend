@@ -30,7 +30,6 @@ export default function TechHistoryTable({ historicoRecente, equipments, usersLi
               historicoRecente.map((tk) => {
                 const eq = equipments.find(e => e.id === tk.equipment_id);
                 const solicitante = usersList.find(u => u.id === tk.user_id);
-                // Usa a data de atualização como a data em que o chamado foi fechado
                 const dataFechamento = tk.updatedAt || tk.createdAt || tk.data_abertura;
 
                 return (
@@ -39,9 +38,19 @@ export default function TechHistoryTable({ historicoRecente, equipments, usersLi
                       {dataFechamento ? new Date(dataFechamento).toLocaleString('pt-BR') : 'Sem data'}
                     </td>
                     <td className="py-4 px-4 text-sm font-semibold text-slate-800">{solicitante?.nome || 'Removido'}</td>
+                    
+                    {/* Célula corrigida aqui (Sem dupla TD) */}
                     <td className="py-4 px-4">
-                      <span className="text-sm font-bold text-slate-600 block">{eq?.patrimonio}</span>
+                      <div className="flex items-center gap-1.5 whitespace-nowrap">
+                        <span className="text-sm font-bold text-slate-700">{eq?.patrimonio || 'S/P'}</span>
+                        {eq?.tipo && (
+                          <span className="text-xs font-medium text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                            {eq.tipo}
+                          </span>
+                        )}
+                      </div>
                     </td>
+
                     <td className="py-4 px-4 text-sm leading-relaxed italic text-slate-500">
                       "{tk.resolucao_ti || 'Nenhuma resolução descrita.'}"
                     </td>

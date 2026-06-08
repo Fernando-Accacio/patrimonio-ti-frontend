@@ -38,10 +38,20 @@ export default function TechMyTicketsTable({ meusChamados, equipments, usersList
                       {dataDoChamado ? new Date(dataDoChamado).toLocaleString('pt-BR') : 'Sem data'}
                     </td>
                     <td className="py-4 px-4 text-sm font-semibold text-slate-800">{solicitante?.nome || 'Removido'}</td>
+                    
+                    {/* Célula corrigida aqui (Sem dupla TD) */}
                     <td className="py-4 px-4">
-                      <span className="text-sm font-bold text-blue-600 block">{eq?.patrimonio}</span>
+                      <div className="flex items-center gap-1.5 whitespace-nowrap">
+                        <span className="text-sm font-bold text-slate-700">{eq?.patrimonio || 'S/P'}</span>
+                        {eq?.tipo && (
+                          <span className="text-xs font-medium text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                            {eq.tipo}
+                          </span>
+                        )}
+                      </div>
                       <span className="text-xs text-slate-500 block mt-0.5">{eq?.observacao}</span>
                     </td>
+
                     <td className="py-4 px-4 text-sm leading-relaxed">{tk.descricao_problema}</td>
                     
                     <td className="py-4 px-4 text-center align-middle">

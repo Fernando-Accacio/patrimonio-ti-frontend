@@ -22,9 +22,20 @@ export default function TicketTableRow({
       <td className="py-4 px-4 font-semibold text-slate-800 text-sm">
         {solicitante ? solicitante.nome : 'Usuário Removido'}
       </td>
+      
+      {/* 🌟 CÉLULA ATUALIZADA: PATRIMÔNIO + BADGE DE TIPO + OBSERVAÇÃO EMBAIXO */}
       <td className="py-4 px-4">
-        <span className="font-semibold text-blue-600 text-sm block">{eq ? eq.patrimonio : `ID: ${ticket.equipment_id}`}</span>
-        <span className="text-xs text-slate-500 block mt-0.5">{eq ? eq.observacao : 'Não informado'}</span>
+        <div className="flex items-center gap-1.5 whitespace-nowrap mb-0.5">
+          <span className="font-semibold text-blue-600 text-sm">
+            {eq ? eq.patrimonio : `ID: ${ticket.equipment_id}`}
+          </span>
+          {eq?.tipo && (
+            <span className="text-xs font-medium text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+              {eq.tipo}
+            </span>
+          )}
+        </div>
+        <span className="text-xs text-slate-500 block">{eq ? eq.observacao : 'Não informado'}</span>
       </td>
       
       <td className="py-4 px-4">
