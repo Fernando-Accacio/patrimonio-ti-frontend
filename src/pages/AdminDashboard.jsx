@@ -9,8 +9,8 @@ import DashboardStats from '../components/admin/DashboardStats';
 import EquipmentTable from '../components/admin/EquipmentTable';
 import TicketTable from '../components/admin/TicketTable';
 import UserManagementTable from '../components/admin/UserManagementTable';
-import ResetRequestsTable from '../components/admin/ResetRequestsTable'; // <-- IMPORTADO AQUI
-import ResetHistoryTable from '../components/admin/ResetHistoryTable';   // <-- IMPORTADO AQUI
+import ResetRequestsTable from '../components/admin/ResetRequestsTable';
+import ResetHistoryTable from '../components/admin/ResetHistoryTable'; 
 
 import EquipmentFormModal from '../components/modals/EquipmentFormModal';
 import UserProfileModal from '../components/modals/UserProfileModal';
@@ -42,7 +42,6 @@ export default function AdminDashboard() {
           <>
             <DashboardStats equipments={hook.equipments} tickets={hook.tickets} currentFilter={hook.statusFilter} setFilter={hook.setStatusFilter} />
             <EquipmentTable equipments={hook.equipments} onNewClick={() => hook.setShowModal(true)} onDeleteClick={hook.handleDeletarEquipamentoManual} />
-            {/* 🌟 ATUALIZADO: Injetado onAssignTechnician na fiação de propriedades */}
             <TicketTable 
               tickets={hook.tickets} 
               equipments={hook.equipments} 
@@ -64,7 +63,6 @@ export default function AdminDashboard() {
 
         {hook.activeTab === 'resets' && (
           <>
-            {/* O CÓDIGO DA PÁGINA FICOU LIMPÍSSIMO AGORA! */}
             <ResetRequestsTable requests={hook.resetRequests} onApprove={hook.handleAprovarReset} onReject={hook.handleRecusarReset} />
             <ResetHistoryTable history={hook.resetHistory} />
           </>

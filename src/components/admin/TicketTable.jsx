@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import api from '../../services/api';
 import TicketTableRow from './TicketTableRow';
 
 export default function TicketTable({ tickets, equipments, usersList, filter, onUpdateStatus, onAssignTechnician }) {
@@ -13,7 +12,20 @@ export default function TicketTable({ tickets, equipments, usersList, filter, on
 
   const filteredTickets = tickets
     .sort((a, b) => b.id - a.id)
-    .filter(tk => filter === 'Todos' || tk.status_chamado === filter);
+    .filter(tk => {
+      if (filter === 'Todos') return true;
+      
+      if (filter === 'Pendentes') {
+        return tk.status_chamado === 'Aberto' || tk.status_chamado === 'Em Andamento';
+      }
+      
+      // 🌟 NOVA REGRA GUARDA-CHUVA: Pega os dois status finais!
+      if (filter === 'Resolvidos') {
+        return tk.status_chamado === 'Concluído' || tk.status_chamado === 'Baixa';
+      }
+      
+      return tk.status_chamado === filter;
+    });
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mt-8 animate-in fade-in duration-200">
@@ -35,7 +47,6 @@ export default function TicketTable({ tickets, equipments, usersList, filter, on
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {/* 🌟 CORRIGIDO: Adicionamos o 'index' aqui para que a variável isLast funcione e não quebre a tela! */}
             {filteredTickets.map((tk, index) => (
               <TicketTableRow 
                 key={tk.id}
