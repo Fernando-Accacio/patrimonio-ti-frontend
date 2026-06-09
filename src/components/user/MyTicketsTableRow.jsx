@@ -33,7 +33,7 @@ export default function MyTicketsTableRow({
       </td>
 
       <td className="py-3 px-3 max-w-xs pt-4">
-        <div className="text-slate-600 break-words text-sm leading-relaxed">
+        <div className="text-slate-600 break-all whitespace-pre-wrap text-sm leading-relaxed">
           {isExpanded ? ticket.descricao_problema : ticket.descricao_problema.length > 50 ? `${ticket.descricao_problema.substring(0, 50)}...` : ticket.descricao_problema}
         </div>
         {ticket.descricao_problema.length > 50 && (
