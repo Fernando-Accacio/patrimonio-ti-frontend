@@ -163,10 +163,22 @@ export function useAdminDashboard(user, logoutContext, navigate) {
     } catch (err) { showToast(err.response?.data?.error, 'error'); }
   };
 
+  // 🌟 NOVA FUNÇÃO: Dispara a atribuição de técnico para a API
+  const handleAtribuirTecnico = async (ticketId, tecnicoId) => {
+    try {
+      const payloadId = tecnicoId === "" ? null : tecnicoId;
+      await api.patch(`/tickets/${ticketId}/assign`, { tecnico_id: payloadId });
+      showToast('Responsável pelo chamado atualizado!', 'success');
+      fetchData(); // Recarrega os dados da tela
+    } catch (err) {
+      showToast(err.response?.data?.error || 'Erro ao atribuir técnico.', 'error');
+    }
+  };
+
   return {
     equipments, tickets, usersList, resetRequests, resetHistory, loading, activeTab, setActiveTab, statusFilter, setStatusFilter,
     showModal, setShowModal, showProfileModal, setShowProfileModal, showUserModal, setShowUserModal, novoEq, setNovoEq, novoUser, setNovoUser,
     confirmModal, setConfirmModal, promptModal, setPromptModal, toast, setToast, showToast, // Exportando as funções do Toast
-    handleDeletarEquipamentoManual, handleAlterarStatusChamado, handleCadastrarEquipamento, handleCadastrarUsuario, handleAprovarReset, handleRecusarReset, fetchData
+    handleDeletarEquipamentoManual, handleAlterarStatusChamado, handleCadastrarEquipamento, handleCadastrarUsuario, handleAprovarReset, handleRecusarReset, handleAtribuirTecnico, fetchData
   };
 }

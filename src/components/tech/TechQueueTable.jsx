@@ -60,7 +60,11 @@ export default function TechQueueTable({ chamadosLivres, equipments, onAssumirCh
 
                     <td className="py-4 px-4 text-sm leading-relaxed">{tk.descricao_problema}</td>
                     <td className="py-4 px-4 text-center">
-                      <button onClick={() => onAssumirChamado(tk.id)} className="bg-amber-100 hover:bg-amber-200 text-amber-700 font-bold px-4 py-2.5 rounded-lg text-sm transition cursor-pointer shadow-sm">
+                      {/* 🌟 BOTÃO ATUALIZADO COM BORDA ELEGANTE */}
+                      <button 
+                        onClick={() => onAssumirChamado(tk.id)} 
+                        className="bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300 hover:border-amber-400 font-bold px-4 py-2.5 rounded-lg text-sm transition cursor-pointer shadow-sm"
+                      >
                         Assumir Chamado
                       </button>
                     </td>

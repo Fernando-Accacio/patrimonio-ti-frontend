@@ -1,5 +1,5 @@
 import React from 'react';
-import { Edit2, UserCircle, AlertTriangle } from 'lucide-react';
+import { Edit2, UserCircle, AlertTriangle, Info, Wrench } from 'lucide-react'; // 🌟 Adicionado Info e Wrench
 
 export default function MyTicketsTableRow({ 
   ticket, 
@@ -41,19 +41,27 @@ export default function MyTicketsTableRow({
             {isExpanded ? 'Ocultar Detalhes' : 'Ler Relato Completo'}
           </button>
         )}
+        
         {ticket.resolucao_ti && (
-          <div className={`mt-3 p-2.5 border rounded-lg text-sm shadow-sm ${
-            ticket.status_chamado === 'Cancelado' ? 'bg-slate-100 border-slate-300 text-slate-700' : 'bg-green-50 border-green-200 text-green-800'
+          /* 🌟 DESIGN PREMIUM UNIFICADO COM O ADMIN */
+          <div className={`mt-3 p-3 border border-slate-200 border-l-4 rounded-r-lg text-sm shadow-xs bg-slate-50 ${
+            ticket.status_chamado === 'Cancelado' ? 'border-l-slate-400' : 'border-l-emerald-500'
           }`}>
-            <strong className="block mb-1 font-bold">
-              {ticket.status_chamado === 'Cancelado' ? 'Histórico de Cancelamento:' : 'Resposta do Suporte:'}
+            <strong className={`flex items-center gap-1.5 mb-1 font-bold text-xs uppercase tracking-wider ${
+              ticket.status_chamado === 'Cancelado' ? 'text-slate-500' : 'text-emerald-700'
+            }`}>
+              {ticket.status_chamado === 'Cancelado' 
+                ? <><Info className="w-3.5 h-3.5" /> Histórico de Cancelamento:</> 
+                : <><Wrench className="w-3.5 h-3.5" /> Resposta do Suporte:</>
+              }
             </strong>
-            <span className="break-words leading-relaxed">{ticket.resolucao_ti}</span>
+            <p className="font-medium text-slate-700 leading-relaxed bg-white/80 p-2 rounded border border-slate-100 mt-1 break-words">
+              {ticket.resolucao_ti}
+            </p>
           </div>
         )}
       </td>
       
-      {/* Coluna do Responsável atualizada para também mostrar o Ramal da TI se houver */}
       <td className="py-3 px-3 text-center pt-4">
         {nomeTecnico ? (
           <div className="flex flex-col items-center gap-0.5">
@@ -77,7 +85,6 @@ export default function MyTicketsTableRow({
         )}
       </td>
 
-      {/* 🌟 FIX: Aplicado 'whitespace-nowrap' no Badge para travar o alinhamento da tabela */}
       <td className="py-3 px-3 text-center pt-4">
         <span className={`whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-bold border ${
           ticket.status_chamado === 'Concluído' ? 'bg-green-100 text-green-700 border-green-200' : 

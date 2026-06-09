@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserPlus, MonitorSmartphone, CheckCircle2 } from 'lucide-react'; // Importado CheckCircle2
+import { UserPlus, MonitorSmartphone, CheckCircle2 } from 'lucide-react'; 
 import { useAuthForm } from '../hooks/useAuthForm';
 
 export default function Register() {
@@ -17,7 +17,6 @@ export default function Register() {
 
         {hook.erro && <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm text-center font-medium">{hook.erro}</div>}
         
-        {/* ALTERADO: Trocado emoji por ícone Lucide e layout expandido */}
         {hook.sucesso && (
           <div className="mb-4 p-4 bg-green-50 text-green-800 rounded-lg text-sm border border-green-200 flex items-start gap-3 animate-in fade-in zoom-in duration-300">
             <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
@@ -38,6 +37,20 @@ export default function Register() {
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">E-mail Institucional</label>
               <input type="email" required className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none text-sm transition" placeholder="seu.nome@itapecerica.sp.gov.br" value={hook.email} onChange={(e) => hook.setEmail(e.target.value)} />
+            </div>
+
+            {/* 🌟 NOVO CAMPO: Input de Ramal Interno Obrigatório */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Ramal Interno</label>
+              <input 
+                type="text" 
+                required 
+                maxLength={4}
+                placeholder="Ex: 2415" 
+                value={hook.ramal} 
+                onChange={(e) => hook.setRamal(e.target.value.replace(/\D/g, ''))} // Limita apenas a números
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none text-sm transition" 
+              />
             </div>
 
             <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2 cursor-pointer transition">

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import api from '../../services/api';
-import TicketTableRow from './TicketTableRow'; // <-- IMPORTANDO A NOVA LINHA AQUI!
+import TicketTableRow from './TicketTableRow';
 
-export default function TicketTable({ tickets, equipments, usersList, filter, onUpdateStatus }) {
+export default function TicketTable({ tickets, equipments, usersList, filter, onUpdateStatus, onAssignTechnician }) {
   const [expandedTickets, setExpandedTickets] = useState({});
 
   const toggleExpandirChamado = (id) => {
@@ -14,15 +14,6 @@ export default function TicketTable({ tickets, equipments, usersList, filter, on
   const filteredTickets = tickets
     .sort((a, b) => b.id - a.id)
     .filter(tk => filter === 'Todos' || tk.status_chamado === filter);
-
-  const handleAssignTechnician = async (ticketId, tecnicoId) => {
-    try {
-      const payload = tecnicoId ? { tecnico_id: Number(tecnicoId) } : { tecnico_id: null };
-      await api.patch(`/tickets/${ticketId}/assign`, payload);
-    } catch (err) {
-      alert("Erro ao atribuir técnico: " + (err.response?.data?.error || err.message));
-    }
-  };
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mt-8 animate-in fade-in duration-200">
@@ -44,7 +35,8 @@ export default function TicketTable({ tickets, equipments, usersList, filter, on
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {filteredTickets.map((tk) => (
+            {/* 🌟 CORRIGIDO: Adicionamos o 'index' aqui para que a variável isLast funcione e não quebre a tela! */}
+            {filteredTickets.map((tk, index) => (
               <TicketTableRow 
                 key={tk.id}
                 ticket={tk}
@@ -53,8 +45,9 @@ export default function TicketTable({ tickets, equipments, usersList, filter, on
                 tecnicos={tecnicos}
                 isExpanded={!!expandedTickets[tk.id]}
                 onToggleExpand={toggleExpandirChamado}
-                onAssignTechnician={handleAssignTechnician}
+                onAssignTechnician={onAssignTechnician}
                 onUpdateStatus={onUpdateStatus}
+                isLast={index === filteredTickets.length - 1} 
               />
             ))}
           </tbody>

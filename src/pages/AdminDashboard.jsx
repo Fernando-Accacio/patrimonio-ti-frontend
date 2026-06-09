@@ -42,7 +42,15 @@ export default function AdminDashboard() {
           <>
             <DashboardStats equipments={hook.equipments} tickets={hook.tickets} currentFilter={hook.statusFilter} setFilter={hook.setStatusFilter} />
             <EquipmentTable equipments={hook.equipments} onNewClick={() => hook.setShowModal(true)} onDeleteClick={hook.handleDeletarEquipamentoManual} />
-            <TicketTable tickets={hook.tickets} equipments={hook.equipments} usersList={hook.usersList} filter={hook.statusFilter} onUpdateStatus={hook.handleAlterarStatusChamado} />
+            {/* 🌟 ATUALIZADO: Injetado onAssignTechnician na fiação de propriedades */}
+            <TicketTable 
+              tickets={hook.tickets} 
+              equipments={hook.equipments} 
+              usersList={hook.usersList} 
+              filter={hook.statusFilter} 
+              onUpdateStatus={hook.handleAlterarStatusChamado} 
+              onAssignTechnician={hook.handleAtribuirTecnico} 
+            />
           </>
         )}
         

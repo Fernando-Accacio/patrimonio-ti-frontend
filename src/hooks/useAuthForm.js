@@ -7,6 +7,7 @@ export function useAuthForm() {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [ramal, setRamal] = useState(''); // 🌟 ADICIONADO: Estado do ramal
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -26,11 +27,19 @@ export function useAuthForm() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setErro('');
+
+    const emailTrimmed = email.trim().toLowerCase();
+
+    // 🌟 VALIDAÇÃO ESTRITA: Se o e-mail não terminar com o domínio oficial da prefeitura
+    if (!emailTrimmed.endsWith('@itapecerica.sp.gov.br')) {
+      setErro('Acesso Negado: Use o formato oficial completo do seu e-mail institucional: seu.nome@itapecerica.sp.gov.br');
+      return;
+    }
+
     try {
-      const response = await api.post('/login', { email, senha });
+      const response = await api.post('/login', { email: emailTrimmed, senha });
       loginContext(response.data.token, response.data.user);
       
-      // NOVO: Roteamento de trânsito inteligente para os 3 perfis!
       const role = response.data.user.role;
       if (role === 'ADMIN') {
         navigate('/admin');
@@ -47,8 +56,23 @@ export function useAuthForm() {
   const handleRegister = async (e) => {
     e.preventDefault();
     setErro(''); setSucesso(false);
+
+    const emailTrimmed = email.trim().toLowerCase();
+
+    // 🌟 VALIDAÇÃO LOCAL: Evita chamadas desnecessárias se o e-mail estiver fora do padrão
+    if (!emailTrimmed.endsWith('@itapecerica.sp.gov.br')) {
+      setErro('O e-mail precisa obrigatoriamente terminar com @itapecerica.sp.gov.br');
+      return;
+    }
+
+    if (!ramal.trim()) {
+      setErro('O número do ramal é obrigatório para solicitar o acesso.');
+      return;
+    }
+
     try {
-      await api.post('/register', { nome, email, role: 'USER' });
+      // 🌟 ATUALIZADO: Enviando nome, email estruturado e ramal obrigatório
+      await api.post('/register', { nome, email: emailTrimmed, ramal, role: 'USER' });
       setSucesso(true);
       setTimeout(() => navigate('/'), 10000);
     } catch (error) {
@@ -57,7 +81,7 @@ export function useAuthForm() {
   };
 
   return {
-    nome, setNome, email, setEmail, senha, setSenha,
+    nome, setNome, email, setEmail, senha, setSenha, ramal, setRamal, // 🌟 EXPORTADO: ramal e setRamal
     erro, sucesso, showPassword, setShowPassword,
     handleLogin, handleRegister, navigate
   };
