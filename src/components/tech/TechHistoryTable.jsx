@@ -57,9 +57,10 @@ export default function TechHistoryTable({ historicoRecente, equipments }) {
                       </div>
                     </td>
 
-                    <td className="py-4 px-4 text-sm leading-relaxed italic text-slate-500">
+                    <td className="py-4 px-4 text-sm leading-relaxed italic text-slate-500 break-all whitespace-pre-wrap">
                       "{tk.resolucao_ti || 'Nenhuma resolução descrita.'}"
                     </td>
+                    
                     <td className="py-4 px-4 text-center">
                       <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-bold border ${
                         tk.status_chamado === 'Concluído' ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'
