@@ -8,7 +8,7 @@ export default function TicketTableRow({
 }) {
   const eq = equipments.find(e => e.id === ticket.equipment_id);
   const dataDoChamado = ticket.createdAt || ticket.data_abertura;
-  const atualTecnico = tecnicos.find(tec => tec.id === ticket.tecnico_id);
+  const atualTecnico = ticket.tecnico || tecnicos.find(tec => tec.id === ticket.tecnico_id);
   const isFinalizado = ['Concluído', 'Baixa', 'Cancelado'].includes(ticket.status_chamado);
 
   return (

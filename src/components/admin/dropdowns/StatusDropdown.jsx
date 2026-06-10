@@ -45,10 +45,10 @@ export default function StatusDropdown({ ticketId, currentStatus, tecnicoId, isF
           }`}>
             {options.map(opt => {
               
-              // 🌟 LÓGICA DE BLOQUEIO DUPLO:
-              const isBlockedToClose = ['Concluído', 'Baixa'].includes(opt.value) && !tecnicoId;
-              const isBlockedToOpen = opt.value === 'Aberto' && tecnicoId; // Se tiver técnico, bloqueia o Aberto!
-              const isBlocked = isBlockedToClose || isBlockedToOpen;
+              // 🌟 CORREÇÃO: Bloqueia progredir o chamado sem um técnico associado
+              const isBlockedWithoutTech = ['Em Andamento', 'Concluído', 'Baixa'].includes(opt.value) && !tecnicoId;
+              const isBlockedToOpen = opt.value === 'Aberto' && tecnicoId; 
+              const isBlocked = isBlockedWithoutTech || isBlockedToOpen;
               
               return (
                 <button
@@ -56,11 +56,10 @@ export default function StatusDropdown({ ticketId, currentStatus, tecnicoId, isF
                   type="button"
                   onClick={() => {
                     if (isBlocked) {
-                      // Mensagens de alerta dinâmicas para orientar o Admin
                       if (isBlockedToOpen) {
                         alert("⚠️ Operação Negada:\n\nUm chamado já atribuído a um técnico não pode ficar com o status 'Aberto'.\n\nSe quiser devolvê-lo para a fila de espera, altere o Responsável (TI) para 'Aguardando...' primeiro.");
                       } else {
-                        alert("⚠️ Operação Negada:\n\nÉ obrigatório atribuir um Responsável (TI) ao chamado antes de marcá-lo como Concluído ou Baixa.");
+                        alert("⚠️ Operação Negada:\n\nÉ necessário atribuir um Responsável (TI) antes de mover o chamado para 'Em Andamento', 'Concluído' ou 'Baixa'.");
                       }
                       return;
                     }
