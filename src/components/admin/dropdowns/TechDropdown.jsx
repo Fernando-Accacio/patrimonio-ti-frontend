@@ -23,7 +23,7 @@ export default function TechDropdown({ ticketId, tecnicos, atualTecnico, isFinal
         }`}
       >
         <span>{atualTecnico ? atualTecnico.nome : 'Aguardando...'}</span>
-        <span className="text-slate-400 text-[10px]">▼</span>
+        <span className="text-slate-400 text-[10px]">{isLast ? '▲' : '▼'}</span>
       </button>
 
       {isOpen && (

@@ -34,7 +34,7 @@ export default function StatusDropdown({ ticketId, currentStatus, tecnicoId, isF
         }`}
       >
         <span>{currentStatus}</span>
-        <span className="text-slate-400 text-[10px]">▼</span>
+        <span className="text-slate-400 text-[10px]">{isLast ? '▲' : '▼'}</span>
       </button>
 
       {isOpen && (
