@@ -19,7 +19,10 @@ export function useAuthForm() {
     const resData = error.response?.data;
     if (resData) {
       if (resData.error === 'Bad Request') return 'Verifique se os dados estão corretos e não há campos vazios.';
-      return resData.error || resData.message || 'Erro ao conectar com o servidor.';
+      
+      // 🌟 CORREÇÃO: Agora ele prioriza a propriedade "message", que é onde o seu UserService
+      // joga a string "E-mail já cadastrado." pelo `throw new Error(...)`
+      return resData.message || resData.error || 'Erro ao conectar com o servidor.';
     }
     return 'Erro de conexão. Verifique se o servidor está rodando.';
   };

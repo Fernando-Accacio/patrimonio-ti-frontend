@@ -18,7 +18,7 @@ export default function EquipmentFormModal({ show, onClose, onSubmit, novoEq, se
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Nº do Patrimônio (7 Dígitos)</label>
             <input 
-              type="text" required maxLength={7} placeholder="Ex: 4658522"
+              type="text" required maxLength={7} placeholder="Ex: 46585"
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none transition-colors"
               value={novoEq.patrimonio}
               onChange={(e) => setNovoEq({...novoEq, patrimonio: e.target.value.replace(/\D/g, '')})}

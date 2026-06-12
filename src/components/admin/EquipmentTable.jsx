@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { Plus, Search } from 'lucide-react';
-import EquipmentTableRow from './EquipmentTableRow'; // <-- IMPORTANDO A LINHA AQUI!
+import EquipmentTableRow from './EquipmentTableRow';
 
 export default function EquipmentTable({ equipments, onNewClick, onDeleteClick }) {
-  const [showAllEquipments, setShowAllEquipments] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
+  // 1. Filtra pela busca e garante a ordenação decrescente
   const filteredEquipments = equipments
     .sort((a, b) => b.id - a.id)
     .filter(eq => eq.patrimonio.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  const displayedEquipments = (showAllEquipments || searchTerm) 
+  // 2. Se o usuário estiver buscando algo, mostra os resultados.
+  //    Se não estiver buscando, exibe RIGOROSAMENTE apenas os 5 últimos.
+  const displayedEquipments = searchTerm 
     ? filteredEquipments 
     : filteredEquipments.slice(0, 5);
 
@@ -20,15 +22,6 @@ export default function EquipmentTable({ equipments, onNewClick, onDeleteClick }
         
         <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
           Equipamentos Cadastrados Recentemente
-          
-          {!searchTerm && filteredEquipments.length > 5 && (
-            <button 
-              onClick={() => setShowAllEquipments(!showAllEquipments)}
-              className="text-xs font-normal text-blue-600 hover:text-blue-800 hover:underline bg-blue-50 px-2 py-0.5 rounded transition ml-2 cursor-pointer"
-            >
-              {showAllEquipments ? 'Ver apenas recentes (5)' : 'Exibir todos'}
-            </button>
-          )}
         </h2>
         
         <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -67,13 +60,21 @@ export default function EquipmentTable({ equipments, onNewClick, onDeleteClick }
             </tr>
           </thead>
           <tbody>
-            {displayedEquipments.map((eq) => (
-              <EquipmentTableRow 
-                key={eq.id} 
-                eq={eq} 
-                onDeleteClick={onDeleteClick} 
-              />
-            ))}
+            {displayedEquipments.length > 0 ? (
+              displayedEquipments.map((eq) => (
+                <EquipmentTableRow 
+                  key={eq.id} 
+                  eq={eq} 
+                  onDeleteClick={onDeleteClick} 
+                />
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6" className="text-center py-6 text-slate-500">
+                  Nenhum equipamento encontrado.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

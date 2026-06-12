@@ -6,12 +6,19 @@ import api from '../services/api';
 export default function Login() {
   const hook = useAuthForm();
   
-  // Estados locais para gerenciar o modal de Esqueci a Senha
   const [showResetModal, setShowResetModal] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [resetLoading, setResetLoading] = useState(false);
   const [resetError, setResetError] = useState('');
   const [resetSuccess, setResetSuccess] = useState(false);
+
+  // Função para fechar e limpar TUDO do modal
+  const handleCloseModal = () => {
+    setShowResetModal(false);
+    setResetEmail('');
+    setResetError('');
+    setResetSuccess(false);
+  };
 
   const handleSendResetRequest = async (e) => {
     e.preventDefault();
@@ -22,18 +29,17 @@ export default function Login() {
     try {
       await api.post('/password-resets/request', { email: resetEmail });
       setResetSuccess(true);
-      setResetEmail('');
+      setResetEmail(''); // Limpa o input se der sucesso também!
     } catch (err) {
       const erroApi = err.response?.data?.error;
       let erroAmigavel = 'Erro ao enviar solicitação. Verifique o e-mail.';
 
-      // Tradutor de erros técnicos para humanos
       if (erroApi === 'Bad Request' || erroApi === 'Validation error') {
         erroAmigavel = 'Formato de e-mail inválido. Verifique se você digitou corretamente.';
       } else if (erroApi === 'User not found' || erroApi === 'Usuário não encontrado') {
         erroAmigavel = 'Nenhum servidor encontrado com este endereço de e-mail.';
       } else if (erroApi) {
-        erroAmigavel = erroApi; // Se o backend mandar um erro customizado, ele exibe
+        erroAmigavel = erroApi; 
       }
 
       setResetError(erroAmigavel);
@@ -56,17 +62,16 @@ export default function Login() {
 
         <form onSubmit={hook.handleLogin} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1" for="EmailLogin">E-mail Institucional</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="EmailLogin">E-mail Institucional</label>
             <input type="email" id="EmailLogin" required className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none text-sm" placeholder="seu.nome@itapecerica.sp.gov.br" value={hook.email} onChange={(e) => hook.setEmail(e.target.value)} />
           </div>
 
           <div>
             <div className="flex justify-between items-center mb-1">
               <label className="block text-sm font-medium text-slate-700">Senha</label>
-              {/* Botão Esqueci minha senha */}
               <button 
                 type="button" 
-                onClick={() => { setShowResetModal(true); setResetError(''); setResetSuccess(false); }}
+                onClick={() => setShowResetModal(true)}
                 className="text-xs text-blue-600 hover:underline font-medium cursor-pointer"
               >
                 Esqueci minha senha
@@ -90,13 +95,12 @@ export default function Login() {
         </div>
       </div>
 
-      {/* MODAL DE SOLICITAÇÃO DE SUPORTE (ESQUECI A SENHA) */}
       {showResetModal && (
         <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in duration-200">
             <div className="bg-slate-50 px-6 py-4 border-b flex justify-between items-center">
               <h3 className="text-base font-bold text-slate-800">Recuperação de Acesso</h3>
-              <button onClick={() => setShowResetModal(false)} className="text-slate-400 hover:text-red-500 cursor-pointer"><X className="w-5 h-5" /></button>
+              <button onClick={handleCloseModal} className="text-slate-400 hover:text-red-500 cursor-pointer"><X className="w-5 h-5" /></button>
             </div>
             
             <form onSubmit={handleSendResetRequest} className="p-6 space-y-4">
@@ -116,9 +120,9 @@ export default function Login() {
                     Insira seu e-mail institucional cadastrado abaixo. O suporte técnico analisará seu pedido para liberar uma nova senha segura.
                   </p>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Seu E-mail Cadastrado</label>
+                    <label className="block text-xs font-semibold text-slate-600 uppercase mb-1" htmlFor="email-reset">Seu E-mail Cadastrado</label>
                     <input 
-                      type="email" required 
+                      type="email" id="email-reset" required 
                       className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-600 outline-none text-sm"
                       placeholder="seu.nome@itapecerica.sp.gov.br"
                       value={resetEmail}
@@ -129,7 +133,7 @@ export default function Login() {
               )}
 
               <div className="pt-2 flex gap-3">
-                <button type="button" onClick={() => setShowResetModal(false)} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 rounded-lg text-xs cursor-pointer">
+                <button type="button" onClick={handleCloseModal} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 rounded-lg text-xs cursor-pointer">
                   {resetSuccess ? 'Fechar Janela' : 'Cancelar'}
                 </button>
                 {!resetSuccess && (

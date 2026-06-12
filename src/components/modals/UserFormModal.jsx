@@ -99,7 +99,7 @@ export default function UserFormModal({ show, onClose, onSubmit, novoUser, setNo
                 required 
                 placeholder="Ex: 46585" 
                 value={novoUser?.matricula || ''} 
-                onChange={(e) => setNovoUser({ ...novoUser, matricula: e.target.value })}
+                onChange={(e) => setNovoUser({ ...novoUser, matricula: e.target.value.replace(/\D/g, '') })}
                 className="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none transition" 
               />
               <Hash className="w-4 h-4 text-slate-400 absolute left-3 top-3" />

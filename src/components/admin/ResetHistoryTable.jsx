@@ -4,8 +4,8 @@ export default function ResetHistoryTable({ history }) {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden animate-in fade-in duration-200">
       <div className="bg-slate-50 px-6 py-4 border-b">
-        <h2 className="text-base font-bold text-slate-800">Histórico de Ações Recentes (Últimos 5)</h2>
-        <p className="text-xs text-slate-500">Registro de auditoria local das últimas redefinições gerenciadas nesta sessão.</p>
+        <h2 className="text-base font-bold text-slate-800">Histórico de Ações Recentes (Últimos 15)</h2>
+        <p className="text-xs text-slate-500">Registro de auditoria global com as últimas redefinições de acesso processadas pelo TI.</p>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm text-slate-600">
@@ -21,7 +21,7 @@ export default function ResetHistoryTable({ history }) {
             {history.length === 0 ? (
               <tr>
                 <td colSpan="4" className="py-6 text-center text-slate-400 italic text-xs">
-                  Nenhum histórico registrado nesta sessão.
+                  Nenhum histórico de redefinição registrado no sistema.
                 </td>
               </tr>
             ) : (

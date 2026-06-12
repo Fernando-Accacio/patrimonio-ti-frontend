@@ -134,22 +134,21 @@ describe('Página de Login', () => {
     });
   });
 
-/** A IMPLEMENTAR
   it('9. Tradutor de Erros: Deve exibir o erro customizado cru enviado diretamente pelo Backend', async () => {
-    api.post.mockRejectedValue({
-      response: { data: { error: 'Você já possui uma Async solicitação pendente. Aguarde o TI.' } }
-    });
-    render(<Login />);
-    
-    fireEvent.click(screen.getByText('Esqueci minha senha'));
-    
-    const resetInput = screen.getAllByPlaceholderText('seu.nome@itapecerica.sp.gov.br')[1];
-    fireEvent.submit(resetInput.closest('form'));
+      api.post.mockRejectedValue({
+        response: { data: { error: 'Você já possui uma solicitação pendente. Aguarde o TI.' } } // 🌟 Aqui estava o erro!
+      });
+      render(<Login />);
+      
+      fireEvent.click(screen.getByText('Esqueci minha senha'));
+      
+      const resetInput = screen.getAllByPlaceholderText('seu.nome@itapecerica.sp.gov.br')[1];
+      fireEvent.submit(resetInput.closest('form'));
 
-    await waitFor(() => {
-      expect(screen.getByText('Você já possui uma solicitação pendente. Aguarde o TI.')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Você já possui uma solicitação pendente. Aguarde o TI.')).toBeInTheDocument();
+      });
     });
-  }); */
 
   it('10. Tradutor de Erros: Deve exibir o fallback amigável caso a API caia sem resposta estruturada', async () => {
     api.post.mockRejectedValue(new Error('Network Crash'));
