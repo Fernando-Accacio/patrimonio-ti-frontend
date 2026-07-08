@@ -4,7 +4,7 @@ import TechDropdown from './dropdowns/TechDropdown';
 import StatusDropdown from './dropdowns/StatusDropdown';
 
 export default function TicketTableRow({ 
-  ticket, equipments, usersList, tecnicos, isExpanded, onToggleExpand, onAssignTechnician, onUpdateStatus, isLast 
+  ticket, equipments, usersList, tecnicos, isExpanded, onToggleExpand, onAssignTechnician, onUpdateStatus, isLast, isLastTech 
 }) {
   const eq = equipments.find(e => e.id === ticket.equipment_id);
   const dataDoChamado = ticket.createdAt || ticket.data_abertura;
@@ -54,7 +54,7 @@ export default function TicketTableRow({
       </td>
 
       <td className="py-4 px-4 text-center align-middle min-w-[220px] pt-4">
-        <TechDropdown ticketId={ticket.id} tecnicos={tecnicos} atualTecnico={atualTecnico} isFinalizado={isFinalizado} onAssignTechnician={onAssignTechnician} isLast={isLast} />
+        <TechDropdown ticketId={ticket.id} tecnicos={tecnicos} atualTecnico={atualTecnico} isFinalizado={isFinalizado} onAssignTechnician={onAssignTechnician} isLast={isLast} isLastTech={isLastTech} />
       </td>
 
       <td className="py-4 px-4 text-center align-middle min-w-[170px] pt-4">

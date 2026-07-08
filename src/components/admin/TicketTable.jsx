@@ -59,6 +59,7 @@ export default function TicketTable({ tickets, equipments, usersList, filter, on
                 onAssignTechnician={onAssignTechnician}
                 onUpdateStatus={onUpdateStatus}
                 isLast={index >= filteredTickets.length - 4} 
+                isLastTech={index >= filteredTickets.length - 1}
               />
             ))}
           </tbody>

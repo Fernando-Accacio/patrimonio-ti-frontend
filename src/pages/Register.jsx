@@ -45,10 +45,10 @@ export default function Register() {
               <input 
                 type="text" 
                 required 
-                maxLength={4}
+                maxLength={11}
                 placeholder="Ex: 2415" 
                 value={hook.ramal} 
-                onChange={(e) => hook.setRamal(e.target.value.replace(/\D/g, ''))} // Limita apenas a números
+                onChange={(e) => hook.setRamal(e.target.value.replace(/\D/g, '').slice(0, 11))} // Limita apenas a números
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none text-sm transition" 
               />
             </div>
