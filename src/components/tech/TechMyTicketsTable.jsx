@@ -1,7 +1,7 @@
 import React from 'react';
-import { Wrench, Check, Trash2 } from 'lucide-react';
+import { Wrench } from 'lucide-react';
 
-export default function TechMyTicketsTable({ meusChamados, equipments, onAtualizarStatus }) {
+export default function TechMyTicketsTable({ meusChamados, equipments }) {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden animate-in fade-in duration-200">
       <div className="bg-blue-50/50 px-6 py-4 border-b flex items-center gap-3">
@@ -20,12 +20,11 @@ export default function TechMyTicketsTable({ meusChamados, equipments, onAtualiz
               <th className="py-3 px-4">Solicitante</th>
               <th className="py-3 px-4">Equipamento</th>
               <th className="py-3 px-4 w-1/3">Problema</th>
-              <th className="py-3 px-4 text-center">Ações de Resolução</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {meusChamados.length === 0 ? (
-              <tr><td colSpan="5" className="py-8 text-center text-slate-400 italic text-sm">Você não possui chamados em andamento. Bom trabalho!</td></tr>
+              <tr><td colSpan="4" className="py-8 text-center text-slate-400 italic text-sm">Você não possui chamados em andamento. Bom trabalho!</td></tr>
             ) : (
               meusChamados.map((tk) => {
                 const eq = equipments.find(e => e.id === tk.equipment_id);
@@ -63,20 +62,6 @@ export default function TechMyTicketsTable({ meusChamados, equipments, onAtualiz
                     </td>
 
                     <td className="py-4 px-4 text-sm leading-relaxed">{tk.descricao_problema}</td>
-                    
-                    <td className="py-4 px-4 text-center align-middle">
-                      <div className="flex flex-col gap-2">
-                        <button 
-                          onClick={() => onAtualizarStatus(tk.id, 'Aguardando Confirmação')} 
-                          className="bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 font-bold px-3 py-2 rounded-lg text-sm transition cursor-pointer shadow-sm flex items-center justify-center gap-1.5"
-                        >
-                          <Check className="w-4 h-4" /> Concluir
-                        </button>
-                        <button onClick={() => onAtualizarStatus(tk.id, 'Baixa')} className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold px-3 py-2 rounded-lg text-sm transition cursor-pointer shadow-sm flex items-center justify-center gap-1.5">
-                          <Trash2 className="w-4 h-4" /> Dar Baixa
-                        </button>
-                      </div>
-                    </td>
                   </tr>
                 );
               })

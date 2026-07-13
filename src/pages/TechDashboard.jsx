@@ -25,12 +25,10 @@ export default function TechDashboard() {
       <main className="max-w-7xl mx-auto px-4 py-8 space-y-8">
         <TechMyTicketsTable 
           meusChamados={hook.meusChamados} equipments={hook.equipments} usersList={hook.usersList} 
-          onAtualizarStatus={hook.handleAtualizarStatus} 
         />
         
         <TechQueueTable 
           chamadosLivres={hook.chamadosLivres} equipments={hook.equipments} usersList={hook.usersList} 
-          onAssumirChamado={hook.handleAssumirChamado} 
         />
 
         {/* NOVA TABELA AQUI */}

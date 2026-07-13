@@ -124,12 +124,22 @@ export default function MyTicketsTableRow({
       
       <td className="py-3 px-3 text-center pt-4">
         {ticket.status_chamado === 'Aberto' ? (
-          <div className="flex flex-col gap-2 max-w-fit mx-auto">
-            <button onClick={() => onEditClick(ticket)} className="text-blue-600 hover:bg-blue-100 font-bold px-2 py-1.5 rounded transition text-xs flex items-center gap-1 cursor-pointer bg-blue-50">
-              <Edit2 className="w-3 h-3" /> Editar
+          <div className="flex min-w-[122px] flex-col gap-2 mx-auto">
+            <button
+              type="button"
+              onClick={() => onEditClick(ticket)}
+              className="group inline-flex items-center justify-center gap-2 rounded-lg border border-blue-200 bg-white px-3 py-2 text-xs font-bold text-blue-700 shadow-sm transition hover:border-blue-600 hover:bg-blue-600 hover:text-white hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-1 cursor-pointer"
+            >
+              <Edit2 className="h-3.5 w-3.5 transition-transform group-hover:-rotate-6" />
+              Editar
             </button>
-            <button onClick={() => onCancelTicketClick(ticket.id)} className="text-red-600 hover:bg-red-100 font-bold px-2 py-1.5 rounded transition text-xs flex items-center gap-1 cursor-pointer bg-red-50">
-              <AlertTriangle className="w-3 h-3" /> Cancelar
+            <button
+              type="button"
+              onClick={() => onCancelTicketClick(ticket.id)}
+              className="group inline-flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-bold text-red-700 shadow-sm transition hover:border-red-600 hover:bg-red-600 hover:text-white hover:shadow focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-1 cursor-pointer"
+            >
+              <AlertTriangle className="h-3.5 w-3.5 transition-transform group-hover:scale-110" />
+              Cancelar
             </button>
           </div>
         ) : ticket.status_chamado === 'Aguardando Confirmação' ? (

@@ -47,45 +47,6 @@ export function useTechDashboard(user, logoutContext, navigate) {
     return () => sse.close();
   }, [fetchData, user, logoutContext, navigate]);
 
-  const handleAssumirChamado = async (ticketId) => {
-    try {
-      await api.patch(`/tickets/${ticketId}/assign`, { tecnico_id: user.id });
-      showToast('Chamado atribuído a você com sucesso!', 'success');
-    } catch (err) {
-      showToast("Erro ao assumir: " + (err.response?.data?.error || err.message), 'error');
-    }
-  };
-
-  const handleAtualizarStatus = async (ticketId, novoStatus) => {
-    if (['Concluído', 'Aguardando Confirmação'].includes(novoStatus)) {
-      setPromptModal({
-        show: true,
-        title: 'Concluir Chamado',
-        placeholder: 'Informe uma observação da solução aplicada...',
-        inputValue: '',
-        isPassword: false,
-        allowEmpty: true,
-        onConfirm: async (resolucao) => {
-          try {
-            await api.patch(`/tickets/${ticketId}/status`, { status_chamado: 'Aguardando Confirmação', resolucao_ti: resolucao || '' });
-            showToast('Chamado enviado para avaliação do usuário!', 'success');
-            fetchData();
-          } catch (e) { showToast('Erro: ' + (e.response?.data?.error || e.message), 'error'); }
-        }
-      });
-    } else if (novoStatus === 'Baixa') {
-      setPromptModal({
-        show: true, title: 'Justificativa de Baixa', placeholder: 'Informe o motivo técnico...', inputValue: '', isPassword: false, allowEmpty: false,
-        onConfirm: async (motivo) => {
-          try {
-            await api.patch(`/tickets/${ticketId}/status`, { status_chamado: novoStatus, resolucao_ti: motivo });
-            showToast('Equipamento baixado com sucesso!', 'success'); fetchData();
-          } catch (e) { showToast("Erro: " + e.response?.data?.error, 'error'); }
-        }
-      });
-    }
-  };
-
   // NOSSOS FILTROS SEPARADOS
   const chamadosLivres = tickets.filter(tk => tk.tecnico_id === null && tk.status_chamado === 'Aberto');
   const meusChamados = tickets.filter(tk => tk.tecnico_id === user.id && tk.status_chamado === 'Em Andamento');
@@ -99,7 +60,6 @@ export function useTechDashboard(user, logoutContext, navigate) {
   return {
     equipments, usersList, loading, showProfileModal, setShowProfileModal,
     confirmModal, setConfirmModal, promptModal, setPromptModal, toast, setToast, showToast,
-    chamadosLivres, meusChamados, historicoRecente, // <-- EXPORTADO AQUI
-    handleAssumirChamado, handleAtualizarStatus
+    chamadosLivres, meusChamados, historicoRecente
   };
 }

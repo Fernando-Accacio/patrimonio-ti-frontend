@@ -1,7 +1,7 @@
 import React from 'react';
 import { Inbox } from 'lucide-react';
 
-export default function TechQueueTable({ chamadosLivres, equipments, onAssumirChamado }) {
+export default function TechQueueTable({ chamadosLivres, equipments }) {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden animate-in fade-in duration-200 delay-100">
       <div className="bg-amber-50/30 px-6 py-4 border-b flex items-center gap-3">
@@ -20,12 +20,11 @@ export default function TechQueueTable({ chamadosLivres, equipments, onAssumirCh
               <th className="py-3 px-4">Solicitante</th>
               <th className="py-3 px-4">Equipamento</th>
               <th className="py-3 px-4 w-1/3">Problema</th>
-              <th className="py-3 px-4 text-center">Ação</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {chamadosLivres.length === 0 ? (
-              <tr><td colSpan="5" className="py-8 text-center text-slate-400 italic text-sm">Nenhum chamado pendente na fila geral.</td></tr>
+              <tr><td colSpan="4" className="py-8 text-center text-slate-400 italic text-sm">Nenhum chamado pendente na fila geral.</td></tr>
             ) : (
               chamadosLivres.map((tk) => {
                 const eq = equipments.find(e => e.id === tk.equipment_id);
@@ -59,15 +58,6 @@ export default function TechQueueTable({ chamadosLivres, equipments, onAssumirCh
                     </td>
 
                     <td className="py-4 px-4 text-sm leading-relaxed">{tk.descricao_problema}</td>
-                    <td className="py-4 px-4 text-center">
-                      {/* 🌟 BOTÃO ATUALIZADO COM BORDA ELEGANTE */}
-                      <button 
-                        onClick={() => onAssumirChamado(tk.id)} 
-                        className="bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300 hover:border-amber-400 font-bold px-4 py-2.5 rounded-lg text-sm transition cursor-pointer shadow-sm"
-                      >
-                        Assumir Chamado
-                      </button>
-                    </td>
                   </tr>
                 );
               })
