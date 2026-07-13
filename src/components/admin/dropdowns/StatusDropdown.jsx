@@ -1,17 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Lock } from 'lucide-react';
 
-export default function StatusDropdown({ ticketId, currentStatus, tecnicoId, isFinalizado, onUpdateStatus, isLast }) {
+export default function StatusDropdown({ ticketId, currentStatus, tecnicoId, isFinalizado, onUpdateStatus, isLast, solicitanteNome }) {
   const [isOpen, setIsOpen] = useState(false);
   const [openDirection, setOpenDirection] = useState(isLast ? 'up' : 'down');
   const buttonRef = useRef(null);
   const menuRef = useRef(null);
 
   const options = [
-    { value: 'Aberto', style: 'text-amber-700 hover:bg-amber-50' },
-    { value: 'Em Andamento', style: 'text-blue-700 hover:bg-blue-50' },
-    { value: 'Concluído', style: 'text-green-700 hover:bg-green-50' },
-    { value: 'Baixa', style: 'text-red-700 hover:bg-red-50' }
+    { value: 'Aberto', label: 'Aberto', style: 'text-amber-700 hover:bg-amber-50' },
+    { value: 'Em Andamento', label: 'Em Andamento', style: 'text-blue-700 hover:bg-blue-50' },
+    { value: 'Aguardando Confirmação', label: 'Concluir', style: 'text-purple-700 hover:bg-purple-50' },
+    { value: 'Baixa', label: 'Dar Baixa', style: 'text-red-700 hover:bg-red-50' }
   ];
 
   const estimateMenuHeight = options.length * 45;
@@ -66,11 +66,17 @@ export default function StatusDropdown({ ticketId, currentStatus, tecnicoId, isF
     return (
       <div className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold border w-full justify-center shadow-xs ${
         currentStatus === 'Concluído' ? 'bg-green-100 text-green-800 border-green-300' :
+        currentStatus === 'Aguardando Confirmação' ? 'bg-purple-100 text-purple-800 border-purple-300' :
         currentStatus === 'Baixa' ? 'bg-red-100 text-red-800 border-red-300' :
         'bg-slate-200 text-slate-800 border-slate-400'
       }`}>
         <Lock className="w-3.5 h-3.5 shrink-0 opacity-80" />
-        <span>{currentStatus}</span>
+        {/* 🌟 NOME AMIGÁVEL QUANDO ESTÁ TRAVADO */}
+        <span>
+          {currentStatus === 'Aguardando Confirmação'
+            ? 'Aguardando confirmação do usuário'
+            : currentStatus}
+        </span>
       </div>
     );
   }
@@ -102,8 +108,8 @@ export default function StatusDropdown({ ticketId, currentStatus, tecnicoId, isF
           }`}>
             {options.map(opt => {
               
-              // 🌟 CORREÇÃO: Bloqueia progredir o chamado sem um técnico associado
-              const isBlockedWithoutTech = ['Em Andamento', 'Concluído', 'Baixa'].includes(opt.value) && !tecnicoId;
+              // Bloqueios
+              const isBlockedWithoutTech = ['Em Andamento', 'Aguardando Confirmação', 'Baixa'].includes(opt.value) && !tecnicoId;
               const isBlockedToOpen = opt.value === 'Aberto' && tecnicoId; 
               const isBlocked = isBlockedWithoutTech || isBlockedToOpen;
               
@@ -114,9 +120,9 @@ export default function StatusDropdown({ ticketId, currentStatus, tecnicoId, isF
                   onClick={() => {
                     if (isBlocked) {
                       if (isBlockedToOpen) {
-                        alert("⚠️ Operação Negada:\n\nUm chamado já atribuído a um técnico não pode ficar com o status 'Aberto'.\n\nSe quiser devolvê-lo para a fila de espera, altere o Responsável (TI) para 'Aguardando...' primeiro.");
-                      } else {
-                        alert("⚠️ Operação Negada:\n\nÉ necessário atribuir um Responsável (TI) antes de mover o chamado para 'Em Andamento', 'Concluído' ou 'Baixa'.");
+                        window.alert("Um chamado com técnico atribuído não pode ficar com o status 'Aberto'.");
+                      } else if (!tecnicoId) {
+                        window.alert('É necessário atribuir um Responsável antes de mudar o status do chamado.');
                       }
                       return;
                     }
@@ -127,7 +133,8 @@ export default function StatusDropdown({ ticketId, currentStatus, tecnicoId, isF
                     isBlocked ? 'opacity-50 cursor-not-allowed bg-slate-50 text-slate-400' : `cursor-pointer ${opt.style}`
                   }`}
                 >
-                  {opt.value} 
+                  {/* 🌟 RENDERIZANDO A LABEL VISUAL E NÃO O VALUE */}
+                  {opt.label} 
                   {isBlocked && <Lock className="w-3.5 h-3.5 text-slate-400 mb-0.5" />}
                 </button>
               )

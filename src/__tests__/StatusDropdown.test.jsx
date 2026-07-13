@@ -36,11 +36,11 @@ describe('Componente StatusDropdown', () => {
     expect(mockUpdate).toHaveBeenCalledWith(2, 'Aberto', 'Em Andamento');
   });
 
-  it('3. Deve bloquear mudança para "Concluído" se NÃO houver técnico', () => {
+  it('3. Deve bloquear conclusão se NÃO houver técnico', () => {
     render(<StatusDropdown ticketId={3} currentStatus="Aberto" tecnicoId={null} isFinalizado={false} onUpdateStatus={() => {}} />);
 
     fireEvent.click(screen.getByRole('button', { name: /Aberto/i }));
-    fireEvent.click(screen.getByRole('button', { name: /Concluído/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Concluir/i }));
 
     // Verifica se o nosso alerta de segurança disparou na tela
     expect(alertMock).toHaveBeenCalledWith(expect.stringContaining('necessário atribuir um Responsável'));

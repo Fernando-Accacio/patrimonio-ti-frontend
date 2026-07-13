@@ -8,7 +8,7 @@ export default function TechHistoryTable({ historicoRecente, equipments }) {
         <div className="bg-slate-600 p-2 rounded-lg"><History className="w-5 h-5 text-white" /></div>
         <div>
           <h2 className="text-lg font-bold text-slate-800">Meu Histórico Recente</h2>
-          <p className="text-sm text-slate-500">Últimos 5 chamados que você finalizou ou deu baixa.</p>
+          <p className="text-sm text-slate-500">Últimos 5 chamados que você enviou para confirmação, finalizou ou deu baixa.</p>
         </div>
       </div>
       
@@ -30,11 +30,17 @@ export default function TechHistoryTable({ historicoRecente, equipments }) {
               historicoRecente.map((tk) => {
                 const eq = equipments.find(e => e.id === tk.equipment_id);
                 const dataFechamento = tk.updatedAt || tk.createdAt || tk.data_abertura;
+                const dataAbertura = tk.createdAt || tk.data_abertura;
+                const [resolucaoAplicada, confirmacaoUsuario] = (tk.resolucao_ti || '')
+                  .split(/\n\s*\n\[(?:CONFIRMADO PELO USUÁRIO|CONFIRMAÇÃO DO USUÁRIO)\]:\s*/i);
 
                 return (
                   <tr key={tk.id} className="hover:bg-slate-50 transition opacity-80">
                     <td className="py-4 px-4 text-sm font-medium text-slate-500">
-                      {dataFechamento ? new Date(dataFechamento).toLocaleString('pt-BR') : 'Sem data'}
+                      <div className="flex flex-col gap-1 leading-tight">
+                        <span>Abertura: {dataAbertura ? new Date(dataAbertura).toLocaleString('pt-BR') : 'Sem data'}</span>
+                        <span>Fechamento: {dataFechamento ? new Date(dataFechamento).toLocaleString('pt-BR') : 'Sem data'}</span>
+                      </div>
                     </td>
                     
                     <td className="py-4 px-4">
@@ -57,15 +63,42 @@ export default function TechHistoryTable({ historicoRecente, equipments }) {
                       </div>
                     </td>
 
-                    <td className="py-4 px-4 text-sm leading-relaxed italic text-slate-500 break-all whitespace-pre-wrap">
-                      "{tk.resolucao_ti || 'Nenhuma resolução descrita.'}"
+                    <td className="py-4 px-4 text-sm leading-relaxed text-slate-500 break-all whitespace-pre-wrap">
+                      <p className="text-slate-600">{tk.descricao_problema || 'Problema não informado.'}</p>
+                      <div className="mt-3 border border-slate-200 border-l-4 border-l-emerald-500 rounded-r-lg bg-slate-50 p-3">
+                        <strong className="flex items-center gap-1.5 mb-1 font-bold text-xs uppercase tracking-wider text-emerald-700">
+                          Resolução Aplicada:
+                        </strong>
+                        <p className="font-medium text-slate-700 bg-white/80 p-2 rounded border border-slate-100 whitespace-pre-wrap">
+                          {resolucaoAplicada || 'Nenhuma resolução descrita.'}
+                        </p>
+                      {confirmacaoUsuario && (
+                        <p className="mt-2 text-[11px] font-semibold text-green-700 bg-green-50 border border-green-100 rounded px-2 py-1.5 whitespace-normal">
+                          [CONFIRMAÇÃO DO USUÁRIO]: {confirmacaoUsuario}
+                        </p>
+                      )}
+                      {tk.status_chamado === 'Aguardando Confirmação' && tk.finalizador?.nome && (
+                        <span className="mt-2 block not-italic text-[11px] font-semibold text-purple-700 bg-purple-50 border border-purple-100 rounded px-2 py-1.5">
+                          Aguardando confirmação do usuário. Atendimento enviado por {tk.finalizador.nome}.
+                        </span>
+                      )}
+                      {tk.confirmador?.nome && (
+                        <span className="mt-2 block not-italic text-[11px] font-semibold text-green-700 bg-green-50 border border-green-100 rounded px-2 py-1.5">
+                          Confirmado pelo usuário: {tk.confirmador.nome}.
+                        </span>
+                      )}
+                      </div>
                     </td>
                     
                     <td className="py-4 px-4 text-center">
                       <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-bold border ${
-                        tk.status_chamado === 'Concluído' ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'
+                        tk.status_chamado === 'Concluído' ? 'bg-green-100 text-green-700 border-green-200' : 
+                        tk.status_chamado === 'Aguardando Confirmação' ? 'bg-purple-100 text-purple-700 border-purple-200' :
+                        'bg-red-50 text-red-700 border-red-200'
                       }`}>
-                        {tk.status_chamado}
+                        {tk.status_chamado === 'Aguardando Confirmação' 
+                          ? 'Aguardando usuário' 
+                          : tk.status_chamado}
                       </span>
                     </td>
                   </tr>

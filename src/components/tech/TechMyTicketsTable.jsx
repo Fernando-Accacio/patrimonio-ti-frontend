@@ -30,11 +30,15 @@ export default function TechMyTicketsTable({ meusChamados, equipments, onAtualiz
               meusChamados.map((tk) => {
                 const eq = equipments.find(e => e.id === tk.equipment_id);
                 const dataDoChamado = tk.createdAt || tk.data_abertura; 
+                const dataFechamento = tk.finished_at || tk.updatedAt || null;
 
                 return (
                   <tr key={tk.id} className="hover:bg-slate-50 transition">
                     <td className="py-4 px-4 text-sm font-medium text-slate-500">
-                      {dataDoChamado ? new Date(dataDoChamado).toLocaleString('pt-BR') : 'Sem data'}
+                      <div className="flex flex-col gap-1 leading-tight">
+                        <span>Abertura: {dataDoChamado ? new Date(dataDoChamado).toLocaleString('pt-BR') : 'Sem data'}</span>
+                        <span>Fechamento: {dataFechamento ? new Date(dataFechamento).toLocaleString('pt-BR') : (tk.status_chamado === 'Aguardando Confirmação' ? 'Aguardando confirmação' : 'Em aberto')}</span>
+                      </div>
                     </td>
                     
                     <td className="py-4 px-4">
@@ -62,8 +66,11 @@ export default function TechMyTicketsTable({ meusChamados, equipments, onAtualiz
                     
                     <td className="py-4 px-4 text-center align-middle">
                       <div className="flex flex-col gap-2">
-                        <button onClick={() => onAtualizarStatus(tk.id, 'Concluído')} className="bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 font-bold px-3 py-2 rounded-lg text-sm transition cursor-pointer shadow-sm flex items-center justify-center gap-1.5">
-                          <Check className="w-4 h-4" /> Finalizar
+                        <button 
+                          onClick={() => onAtualizarStatus(tk.id, 'Aguardando Confirmação')} 
+                          className="bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 font-bold px-3 py-2 rounded-lg text-sm transition cursor-pointer shadow-sm flex items-center justify-center gap-1.5"
+                        >
+                          <Check className="w-4 h-4" /> Concluir
                         </button>
                         <button onClick={() => onAtualizarStatus(tk.id, 'Baixa')} className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold px-3 py-2 rounded-lg text-sm transition cursor-pointer shadow-sm flex items-center justify-center gap-1.5">
                           <Trash2 className="w-4 h-4" /> Dar Baixa

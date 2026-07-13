@@ -6,7 +6,7 @@ const api = axios.create({
 
 // Interceptor de Requisição (Manda o Token)
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('@PatrimonioTI:token');
+  const token = sessionStorage.getItem('@PatrimonioTI:token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -21,13 +21,19 @@ api.interceptors.response.use(
   (error) => {
     // BLINDAGEM: As interrogações garantem que, se a internet cair ou o backend estiver desligado, o React não crashe.
     if (error.response && error.response.status === 401 && !error.config?.url?.includes('/login')) {
-      localStorage.removeItem('@PatrimonioTI:token');
-      localStorage.removeItem('@PatrimonioTI:user');
+      sessionStorage.removeItem('@PatrimonioTI:token');
+      sessionStorage.removeItem('@PatrimonioTI:user');
       window.location.href = '/'; 
     }
     
     return Promise.reject(error);
   }
 );
+
+// 🌟 NOVA FUNÇÃO CONECTADA
+export const responderConfirmacaoTicket = async (id, aprovado, motivo = '') => {
+  const response = await api.patch(`/tickets/${id}/confirmar`, { aprovado, motivo });
+  return response.data;
+};
 
 export default api;

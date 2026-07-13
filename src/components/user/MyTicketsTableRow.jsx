@@ -1,22 +1,37 @@
-import React from 'react';
-import { Edit2, UserCircle, AlertTriangle, Info, Wrench } from 'lucide-react'; // 🌟 Adicionado Info e Wrench
+import React, { useState } from 'react';
+import { Edit2, UserCircle, AlertTriangle, Info, Wrench, Check } from 'lucide-react';
 
 export default function MyTicketsTableRow({ 
-  ticket, 
-  equipments, 
-  isExpanded, 
-  onToggleExpand, 
-  onEditClick, 
-  onCancelTicketClick 
+  ticket, equipments, isExpanded, onToggleExpand, onEditClick, onCancelTicketClick, 
+  onResponderConfirmacao
 }) {
+  const [comentario, setComentario] = useState('');
+  const [erroConfirmacao, setErroConfirmacao] = useState('');
   const matchedEq = equipments.find(e => e.id === ticket.equipment_id);
   const dataDoChamado = ticket.createdAt || ticket.data_abertura;
+  const dataFechamento = ticket.finished_at || ticket.updatedAt || null;
   const nomeTecnico = ticket.tecnico?.nome || null;
+  const resolucaoVisivel = ticket.resolucao_ti
+    ?.replace(/\n\s*\n\[(?:CONFIRMADO PELO USUÁRIO|CONFIRMAÇÃO DO USUÁRIO)\]:[\s\S]*$/i, '')
+    .trim();
+
+  const handleResponder = (aprovado) => {
+    if (!aprovado && !comentario.trim()) {
+      setErroConfirmacao('Digite o que faltou para concluir antes de retornar o chamado.');
+      return;
+    }
+
+    setErroConfirmacao('');
+    onResponderConfirmacao(ticket.id, aprovado, comentario.trim());
+  };
 
   return (
     <tr className={`border-b align-top transition ${ticket.status_chamado === 'Cancelado' ? 'bg-slate-50/50 opacity-70' : 'hover:bg-slate-50'}`}>
       <td className="py-3 px-3 text-sm font-medium text-slate-500 pt-4">
-        {dataDoChamado ? new Date(dataDoChamado).toLocaleString('pt-BR') : 'Sem data'}
+        <div className="flex flex-col gap-1">
+          <span>Abertura: {dataDoChamado ? new Date(dataDoChamado).toLocaleString('pt-BR') : 'Sem data'}</span>
+          <span>Fechamento: {dataFechamento ? new Date(dataFechamento).toLocaleString('pt-BR') : (ticket.status_chamado === 'Aguardando Confirmação' ? 'Aguardando confirmação' : 'Em aberto')}</span>
+        </div>
       </td>
       
       <td className="py-3 px-3 pt-4">
@@ -42,7 +57,7 @@ export default function MyTicketsTableRow({
           </button>
         )}
         
-        {ticket.resolucao_ti && (
+        {resolucaoVisivel && (
           /* 🌟 DESIGN PREMIUM UNIFICADO COM O ADMIN */
           <div className={`mt-3 p-3 border border-slate-200 border-l-4 rounded-r-lg text-sm shadow-xs bg-slate-50 ${
             ticket.status_chamado === 'Cancelado' ? 'border-l-slate-400' : 'border-l-emerald-500'
@@ -56,8 +71,18 @@ export default function MyTicketsTableRow({
               }
             </strong>
             <p className="font-medium text-slate-700 leading-relaxed bg-white/80 p-2 rounded border border-slate-100 mt-1 break-words">
-              {ticket.resolucao_ti}
+              {resolucaoVisivel}
             </p>
+            {ticket.status_chamado === 'Aguardando Confirmação' && ticket.finalizador?.nome && (
+              <p className="mt-2 text-[12px] font-semibold text-purple-700 bg-purple-50 border border-purple-100 rounded px-2 py-2">
+                Sua análise ainda está aguardando confirmação após o atendimento de {ticket.finalizador.nome}.
+              </p>
+            )}
+            {ticket.status_chamado === 'Aguardando Confirmação' && (
+              <p className="mt-2 text-[11px] font-medium text-slate-500 bg-slate-50 border border-slate-100 rounded px-2 py-1.5">
+                Se você não confirmar a solução, o sistema fará a confirmação automática em 3 dias.
+              </p>
+            )}
           </div>
         )}
       </td>
@@ -90,6 +115,7 @@ export default function MyTicketsTableRow({
           ticket.status_chamado === 'Concluído' ? 'bg-green-100 text-green-700 border-green-200' : 
           ticket.status_chamado === 'Baixa' ? 'bg-red-50 text-red-700 border-red-200' :
           ticket.status_chamado === 'Cancelado' ? 'bg-slate-200 text-slate-600 border-slate-300' : 
+          ticket.status_chamado === 'Aguardando Confirmação' ? 'bg-purple-100 text-purple-700 border-purple-200 animate-pulse' :
           'bg-blue-100 text-blue-700 border-blue-200' 
         }`}>
           {ticket.status_chamado}
@@ -105,6 +131,31 @@ export default function MyTicketsTableRow({
             <button onClick={() => onCancelTicketClick(ticket.id)} className="text-red-600 hover:bg-red-100 font-bold px-2 py-1.5 rounded transition text-xs flex items-center gap-1 cursor-pointer bg-red-50">
               <AlertTriangle className="w-3 h-3" /> Cancelar
             </button>
+          </div>
+        ) : ticket.status_chamado === 'Aguardando Confirmação' ? (
+          <div className="flex flex-col gap-2 max-w-[180px] mx-auto">
+            {erroConfirmacao && (
+              <div className="rounded border border-red-200 bg-red-50 px-2 py-1 text-[10px] font-medium text-red-700 text-left leading-tight">
+                {erroConfirmacao}
+              </div>
+            )}
+            <textarea 
+              placeholder="Comentário opcional sobre a solução..." 
+              className="text-xs p-2 border rounded border-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-400 w-full resize-none h-16"
+              value={comentario}
+              onChange={(e) => {
+                setComentario(e.target.value);
+                if (erroConfirmacao) setErroConfirmacao('');
+              }}
+            />
+            <div className="flex gap-1">
+              <button type="button" onClick={() => handleResponder(true)} className="bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-2 rounded text-[10px] flex-1">
+                Confirmar solução
+              </button>
+              <button type="button" onClick={() => handleResponder(false)} className="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-[10px] flex-1">
+                Não foi concluído
+              </button>
+            </div>
           </div>
         ) : (
           <span className="text-xs text-slate-400 italic font-medium bg-slate-50 px-2 py-1.5 rounded block border border-slate-100">Trancado</span>

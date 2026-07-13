@@ -7,9 +7,9 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Quando o app abrir, ele procura o token e os dados do usuário no cofre
-    const token = localStorage.getItem('@PatrimonioTI:token');
-    const storedUser = localStorage.getItem('@PatrimonioTI:user');
+    // A sessão é isolada por aba para permitir testar perfis diferentes ao mesmo tempo.
+    const token = sessionStorage.getItem('@PatrimonioTI:token');
+    const storedUser = sessionStorage.getItem('@PatrimonioTI:user');
 
     if (token && storedUser) {
       setUser(JSON.parse(storedUser));
@@ -18,14 +18,14 @@ export function AuthProvider({ children }) {
   }, []);
 
   const loginContext = (token, userData) => {
-    localStorage.setItem('@PatrimonioTI:token', token);
-    localStorage.setItem('@PatrimonioTI:user', JSON.stringify(userData));
+    sessionStorage.setItem('@PatrimonioTI:token', token);
+    sessionStorage.setItem('@PatrimonioTI:user', JSON.stringify(userData));
     setUser(userData);
   };
 
   const logoutContext = () => {
-    localStorage.removeItem('@PatrimonioTI:token');
-    localStorage.removeItem('@PatrimonioTI:user');
+    sessionStorage.removeItem('@PatrimonioTI:token');
+    sessionStorage.removeItem('@PatrimonioTI:user');
     setUser(null);
   };
 

@@ -7,13 +7,26 @@ import Header from '../components/layout/Header';
 import TicketForm from '../components/user/TicketForm';
 import MyTicketsTable from '../components/user/MyTicketsTable';
 import UserProfileModal from '../components/modals/UserProfileModal';
-import GlobalModals from '../components/modals/GlobalModals'; // IMPORTADO AQUI
+import GlobalModals from '../components/modals/GlobalModals';
 import { CheckCircle2, AlertCircle, X } from 'lucide-react';
+import { responderConfirmacaoTicket } from '../services/api';
 
 export default function UserDashboard() {
   const { user, logoutContext } = useContext(AuthContext); 
   const navigate = useNavigate();
   const hook = useUserDashboard(user, logoutContext, navigate);
+
+  // 🌟 FUNÇÃO QUE PROCESSA A RESPOSTA DO USUÁRIO
+  const handleResponderConfirmacao = async (ticketId, aprovado, motivo) => {
+    try {
+      await responderConfirmacaoTicket(ticketId, aprovado, motivo);
+      hook.showToast(`Chamado ${aprovado ? 'finalizado' : 'retornado para a TI'} com sucesso!`, 'success');
+      hook.carregarDados();
+    } catch (error) {
+      console.error(error);
+      hook.showToast(error.response?.data?.error || 'Erro ao processar resposta.', 'error');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-100 relative overflow-hidden">
@@ -36,14 +49,15 @@ export default function UserDashboard() {
             tickets={hook.meusChamados} 
             equipments={hook.equipments} 
             onEditClick={hook.handleIniciarEdicao} 
-            onCancelTicketClick={hook.handleCancelarChamado} // PROPRIEDADE PASSADA AQUI
+            onCancelTicketClick={hook.handleCancelarChamado}
+            // 🌟 PASSANDO A PROP PARA A TABELA
+            onResponderConfirmacao={handleResponderConfirmacao}
           />
         </div>
       </main>
 
       <UserProfileModal show={hook.showProfileModal} onClose={() => hook.setShowProfileModal(false)} user={user} onSuccess={(msg) => hook.showToast(msg, 'success')} />
 
-      {/* PLUGADO OS MODAIS GLOBAIS NA TELA DO USUÁRIO TAMBÉM */}
       <GlobalModals 
         alertModal={{ show: false, title: '', message: '' }} 
         setAlertModal={() => {}} 

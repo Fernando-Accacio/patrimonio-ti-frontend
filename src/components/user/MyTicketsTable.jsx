@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import MyTicketsTableRow from './MyTicketsTableRow';
+import { Edit2, UserCircle, AlertTriangle, Info, Wrench, Check } from 'lucide-react';
 
-export default function MyTicketsTable({ tickets, equipments, onEditClick, onCancelTicketClick }) {
+export default function MyTicketsTable({ tickets, equipments, onEditClick, onCancelTicketClick, onResponderConfirmacao }) {
   const [expandedTickets, setExpandedTickets] = useState({});
 
   const toggleExpandirChamado = (id) => {
@@ -33,6 +34,7 @@ export default function MyTicketsTable({ tickets, equipments, onEditClick, onCan
                 onToggleExpand={toggleExpandirChamado}
                 onEditClick={onEditClick}
                 onCancelTicketClick={onCancelTicketClick}
+                onResponderConfirmacao={onResponderConfirmacao}
               />
             ))}
           </tbody>

@@ -5,7 +5,7 @@ export default function ConfirmModal({ show, title, message, onCancel, onConfirm
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[60] p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[60] p-4">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
         <div className="p-4 border-b bg-orange-50 border-orange-100 text-orange-800 flex items-center gap-2">
           <AlertTriangle className="w-5 h-5" />

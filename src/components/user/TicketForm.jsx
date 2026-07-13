@@ -21,10 +21,10 @@ export default function TicketForm({
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Nº do Patrimônio (P.M.I.S)</label>
           <input 
-            type="text" required maxLength={7} placeholder="Ex: 4658599"
+            type="text" required maxLength={11} placeholder="Ex: 46585"
             className="w-full px-3 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-600 outline-none text-sm transition"
             value={patrimonio}
-            onChange={(e) => setPatrimonio(e.target.value.replace(/\D/g, ''))}
+            onChange={(e) => setPatrimonio(e.target.value.replace(/\D/g, '').slice(0, 11))}
           />
         </div>
         
@@ -93,6 +93,11 @@ export default function TicketForm({
           <p className="text-[10px] text-slate-400 mt-2 leading-tight">
             Se você já tratou deste caso com algum técnico específico, selecione-o aqui para rotear o chamado diretamente.
           </p>
+          {tecnicoIdSelecionado && (
+            <p className="mt-2 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-[10px] leading-tight font-medium text-amber-800">
+              Aviso: ao vincular este chamado a um técnico específico, ele seguirá como <strong>Em Andamento</strong> e não poderá mais ser editado após o envio.
+            </p>
+          )}
         </div>
 
         <button type="submit" className={`w-full text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition cursor-pointer shadow-sm ${

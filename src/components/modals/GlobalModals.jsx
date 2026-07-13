@@ -29,8 +29,12 @@ export default function GlobalModals({ alertModal, setAlertModal, confirmModal, 
         inputValue={promptModal.inputValue} 
         setInputValue={(val) => setPromptModal({ ...promptModal, inputValue: val })} 
         isPassword={promptModal.isPassword} 
-        onCancel={() => setPromptModal({ ...promptModal, show: false })} 
-        onConfirm={() => { promptModal.onConfirm(promptModal.inputValue); setPromptModal({ ...promptModal, show: false }); }} 
+        allowEmpty={promptModal.allowEmpty} 
+        onCancel={() => setPromptModal({ ...promptModal, show: false, inputValue: '' })} 
+        onConfirm={async () => {
+          await promptModal.onConfirm?.(promptModal.inputValue);
+          setPromptModal({ ...promptModal, show: false, inputValue: '' });
+        }} 
       />
     </>
   );

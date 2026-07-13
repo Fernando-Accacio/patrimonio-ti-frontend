@@ -8,13 +8,19 @@ export default function TicketTableRow({
 }) {
   const eq = equipments.find(e => e.id === ticket.equipment_id);
   const dataDoChamado = ticket.createdAt || ticket.data_abertura;
+  const dataFechamento = ticket.finished_at || ticket.updatedAt || null;
   const atualTecnico = ticket.tecnico || tecnicos.find(tec => tec.id === ticket.tecnico_id);
-  const isFinalizado = ['Concluído', 'Baixa', 'Cancelado'].includes(ticket.status_chamado);
+  
+  // 🌟 INCLUÍDO 'Aguardando Confirmação' PARA TRAVAR OS DROPDOWNS ENQUANTO ESPERA O USUÁRIO
+  const isFinalizado = ['Concluído', 'Baixa', 'Cancelado', 'Aguardando Confirmação'].includes(ticket.status_chamado);
 
   return (
     <tr className="align-top transition hover:bg-slate-50 border-b border-slate-100">
       <td className="py-4 px-4 whitespace-nowrap text-sm text-slate-500 font-medium leading-tight pt-5">
-        {dataDoChamado ? new Date(dataDoChamado).toLocaleString('pt-BR') : 'Sem data'}
+        <div className="flex flex-col gap-1 whitespace-normal leading-tight">
+          <span>Abertura: {dataDoChamado ? new Date(dataDoChamado).toLocaleString('pt-BR') : 'Sem data'}</span>
+          <span>Fechamento: {dataFechamento ? new Date(dataFechamento).toLocaleString('pt-BR') : (ticket.status_chamado === 'Aguardando Confirmação' ? 'Aguardando confirmação' : 'Em aberto')}</span>
+        </div>
       </td>
       
       <td className="py-4 px-4 pt-5">
@@ -45,10 +51,24 @@ export default function TicketTableRow({
             <strong className={`flex items-center gap-1.5 mb-1 font-bold text-xs uppercase tracking-wider ${ticket.status_chamado === 'Cancelado' ? 'text-slate-500' : 'text-emerald-700'}`}>
               {ticket.status_chamado === 'Cancelado' ? <><Info className="w-3.5 h-3.5" /> Motivo do Cancelamento:</> : <><Wrench className="w-3.5 h-3.5" /> Resolução Aplicada:</>}
             </strong>
-            {/* 🌟 FIX: Proteção contra palavras gigantes na resposta da TI */}
             <p className="font-medium text-slate-700 leading-relaxed bg-white/80 p-2 rounded border border-slate-100 mt-1 break-all whitespace-pre-wrap">
             {ticket.resolucao_ti}
             </p>
+            {ticket.status_chamado === 'Aguardando Confirmação' && ticket.finalizador?.nome && (
+              <p className="mt-2 text-[12px] font-semibold text-purple-700 bg-purple-50 border border-purple-100 rounded px-2 py-2">
+                Aguardando confirmação do usuário. Atendimento enviado por {ticket.finalizador.nome}.
+              </p>
+            )}
+            {ticket.status_chamado === 'Aguardando Confirmação' && (
+              <p className="mt-2 text-[11px] font-medium text-slate-500 bg-slate-50 border border-slate-100 rounded px-2 py-1.5">
+                Se o cliente não confirmar, a solução será validada automaticamente em 3 dias.
+              </p>
+            )}
+            {ticket.status_chamado === 'Concluído' && ticket.confirmador?.nome && (
+              <p className="mt-2 text-[11px] font-semibold text-green-700 bg-green-50 border border-green-100 rounded px-2 py-1.5">
+                Confirmado pelo usuário: {ticket.confirmador.nome}.
+              </p>
+            )}
           </div>
         )}
       </td>
@@ -58,7 +78,7 @@ export default function TicketTableRow({
       </td>
 
       <td className="py-4 px-4 text-center align-middle min-w-[170px] pt-4">
-        <StatusDropdown ticketId={ticket.id} currentStatus={ticket.status_chamado} tecnicoId={ticket.tecnico_id} isFinalizado={isFinalizado} onUpdateStatus={onUpdateStatus} isLast={isLast} />
+        <StatusDropdown ticketId={ticket.id} currentStatus={ticket.status_chamado} tecnicoId={ticket.tecnico_id} isFinalizado={isFinalizado} onUpdateStatus={onUpdateStatus} isLast={isLast} solicitanteNome={ticket.user?.nome || ''} />
       </td>
     </tr>
   );

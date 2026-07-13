@@ -122,6 +122,6 @@ export function useUserDashboard(user, logoutContext, navigate) {
     patrimonio, setPatrimonio, tipo, setTipo, localizacao, setLocalizacao,
     descricao, setDescricao, editingTicketId, toast, setToast, showToast,
     promptModal, setPromptModal, handleCancelarChamado, // Exportado os novos controles
-    handleIniciarEdicao, handleCancelarEdicao, handleSubmitForm
+    handleIniciarEdicao, handleCancelarEdicao, handleSubmitForm, carregarDados
   };
 }

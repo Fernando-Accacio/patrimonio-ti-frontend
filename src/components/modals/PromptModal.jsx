@@ -1,7 +1,7 @@
 import React from 'react';
 import { CheckCircle, X } from 'lucide-react';
 
-export default function PromptModal({ show, title, placeholder, inputValue, setInputValue, onCancel, onConfirm, isPassword }) {
+export default function PromptModal({ show, title, placeholder, inputValue, setInputValue, onCancel, onConfirm, isPassword, allowEmpty = false }) {
   if (!show) return null;
 
   return (
@@ -17,8 +17,13 @@ export default function PromptModal({ show, title, placeholder, inputValue, setI
         </div>
         <div className="p-6">
           <label className="block text-sm font-medium text-slate-700 mb-2">
-            {isPassword ? 'Nova Senha:' : 'Resolução / Solução Aplicada:'}
+            {isPassword ? 'Nova Senha:' : allowEmpty ? 'Resolução / Solução Aplicada (opcional):' : 'Resolução / Solução Aplicada:'}
           </label>
+          {!isPassword && allowEmpty && (
+            <p className="mb-2 rounded border border-slate-200 bg-slate-50 px-3 py-2 text-[11px] leading-tight text-slate-500">
+              Você pode deixar em branco ao confirmar a solução. Se o chamado não for confirmado, ele será marcado automaticamente após 3 dias.
+            </p>
+          )}
           
           {isPassword ? (
              <input 
@@ -53,7 +58,7 @@ export default function PromptModal({ show, title, placeholder, inputValue, setI
             Cancelar
           </button>
           <button 
-            disabled={!inputValue.trim() || (isPassword && inputValue.trim().length < 6)}
+            disabled={(!allowEmpty && !inputValue.trim()) || (isPassword && inputValue.trim().length < 6)}
             onClick={onConfirm}
             className="px-6 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-300 text-white font-semibold rounded-lg transition text-sm cursor-pointer"
           >

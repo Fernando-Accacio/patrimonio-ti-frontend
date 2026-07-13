@@ -24,7 +24,7 @@ export function useAdminDashboard(user, logoutContext, navigate) {
 
   // Modais de confirmação e Toast
   const [confirmModal, setConfirmModal] = useState({ show: false, title: '', message: '', onConfirm: null });
-  const [promptModal, setPromptModal] = useState({ show: false, title: '', placeholder: '', inputValue: '', onConfirm: null, isPassword: false });
+  const [promptModal, setPromptModal] = useState({ show: false, title: '', placeholder: '', inputValue: '', onConfirm: null, isPassword: false, allowEmpty: false });
   
   // NOVO: Controle do Toast
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
@@ -120,20 +120,27 @@ export function useAdminDashboard(user, logoutContext, navigate) {
 
   const handleAlterarStatusChamado = (ticketId, statusAtual, novoStatus) => {
     if (statusAtual === novoStatus) return;
-    if (novoStatus === 'Concluído') {
+    
+    if (['Concluído', 'Aguardando Confirmação'].includes(novoStatus)) {
       setPromptModal({
-        show: true, title: 'Finalizar Chamado', placeholder: 'Descreva a solução aplicada...', inputValue: '', isPassword: false,
+        show: true,
+        title: 'Concluir Chamado',
+        placeholder: 'Informe uma observação da solução aplicada...',
+        inputValue: '',
+        isPassword: false,
+        allowEmpty: true,
         onConfirm: async (res) => {
           try {
-            await api.patch(`/tickets/${ticketId}/status`, { status_chamado: novoStatus, resolucao_ti: res });
-            showToast('Chamado resolvido!', 'success');
+            await api.patch(`/tickets/${ticketId}/status`, { status_chamado: 'Aguardando Confirmação', resolucao_ti: res || '' });
+            showToast('Chamado enviado para confirmação do usuário!', 'success');
             fetchData();
-          } catch (error) { showToast(error.response?.data?.error, 'error'); }
+          } catch (error) { showToast(error.response?.data?.error || 'Erro ao atualizar status.', 'error'); }
         }
       });
     } else if (novoStatus === 'Baixa') {
       setPromptModal({
         show: true, title: 'Justificativa de Baixa', placeholder: 'Informe o motivo técnico...', inputValue: '', isPassword: false,
+        allowEmpty: false,
         onConfirm: async (motivo) => {
           try {
             const ticketAlvo = tickets.find(t => t.id === ticketId);
