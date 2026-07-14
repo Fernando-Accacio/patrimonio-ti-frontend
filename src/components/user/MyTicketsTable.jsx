@@ -10,21 +10,24 @@ export default function MyTicketsTable({ tickets, equipments, onEditClick, onCan
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-fit">
+    <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-fit flex flex-col">
       <h2 className="text-lg font-bold text-slate-800 mb-4 border-b pb-2">Meus Chamados Recentes</h2>
-      <div className="overflow-x-auto max-h-[600px] overflow-y-auto pr-2">
-        <table className="w-full text-left text-sm text-slate-600">
-          <thead className="bg-slate-50 text-slate-700 font-medium border-b sticky top-0 z-10">
+      
+      {/* 🌟 MAGIA DA ROLAGEM AQUI: max-h-[65vh] garante que a barra sempre fique visível na tela! */}
+      <div className="overflow-x-auto overflow-y-auto max-h-[65vh] pr-2 rounded-b-lg">
+        {/* Adicionado min-w-[800px] para a tabela não esmagar as colunas e forçar o scroll horizontal bonitinho */}
+        <table className="w-full text-left text-sm text-slate-600 min-w-[800px]">
+          <thead className="bg-slate-50 text-slate-700 font-medium border-b sticky top-0 z-10 shadow-sm">
             <tr>
-              <th className="py-2 px-3">Data / Horário</th>
-              <th className="py-2 px-3">Patrimônio</th> 
+              <th className="py-2 px-3 whitespace-nowrap">Data / Horário</th>
+              <th className="py-2 px-3 whitespace-nowrap">Patrimônio</th> 
               <th className="py-2 px-3 w-1/2">Problema</th>
-              <th className="py-2 px-3 text-center">Responsável</th>
-              <th className="py-2 px-3 text-center">Status</th>
-              <th className="py-2 px-3 text-center">Ações</th>
+              <th className="py-2 px-3 text-center whitespace-nowrap">Responsável</th>
+              <th className="py-2 px-3 text-center whitespace-nowrap">Status</th>
+              <th className="py-2 px-3 text-center whitespace-nowrap">Ações</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-slate-100">
             {[...tickets].sort((a,b) => b.id - a.id).map(ticket => (
               <MyTicketsTableRow 
                 key={ticket.id}

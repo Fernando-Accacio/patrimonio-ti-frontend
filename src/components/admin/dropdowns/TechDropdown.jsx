@@ -81,7 +81,11 @@ export default function TechDropdown({ ticketId, tecnicos, atualTecnico, isFinal
           <div ref={menuRef} className={`absolute left-0 right-0 bg-white border border-slate-200 rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto divide-y divide-slate-100 animate-in fade-in duration-150 ${
             openDirection === 'up' ? 'bottom-full mb-1 slide-in-from-bottom-2' : 'top-full mt-1 slide-in-from-top-2'
           }`}>
-            <button type="button" onClick={() => { onAssignTechnician(ticketId, ""); setIsOpen(false); }} className="w-full text-left px-4 py-2.5 text-xs font-bold text-amber-700 hover:bg-amber-50 transition cursor-pointer">
+            <button 
+              type="button" 
+              onClick={() => { onAssignTechnician(ticketId, null); setIsOpen(false); }} // 🌟 Mudado de "" para null
+              className="w-full text-left px-4 py-2.5 text-xs font-bold text-amber-700 hover:bg-amber-50 transition cursor-pointer"
+            >
               Aguardando...
             </button>
             {tecnicos.map(tec => (

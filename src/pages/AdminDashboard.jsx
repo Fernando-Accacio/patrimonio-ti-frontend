@@ -40,8 +40,22 @@ export default function AdminDashboard() {
       <main className="max-w-7xl mx-auto px-4 py-8 space-y-8">
         {hook.activeTab === 'dashboard' && (
           <>
-            <DashboardStats equipments={hook.equipments} tickets={hook.tickets} currentFilter={hook.statusFilter} setFilter={hook.setStatusFilter} />
-            <EquipmentTable equipments={hook.equipments} onNewClick={() => hook.setShowModal(true)} onDeleteClick={hook.handleDeletarEquipamentoManual} />
+            {/* 1º: Tabela de Equipamentos agora no topo */}
+            <EquipmentTable 
+              equipments={hook.equipments} 
+              onNewClick={() => hook.setShowModal(true)} 
+              onDeleteClick={hook.handleDeletarEquipamentoManual} 
+            />
+
+            {/* 2º: Stats de Filtros logo abaixo dos Equipamentos Recentes */}
+            <DashboardStats 
+              equipments={hook.equipments} 
+              tickets={hook.tickets} 
+              currentFilter={hook.statusFilter} 
+              setFilter={hook.setStatusFilter} 
+            />
+
+            {/* 3º: Tabela de Gestão de Chamados (Paginada) no final */}
             <TicketTable 
               tickets={hook.tickets} 
               equipments={hook.equipments} 
@@ -56,7 +70,7 @@ export default function AdminDashboard() {
         {hook.activeTab === 'usuarios' && (
           <UserManagementTable onAddClick={() => hook.setShowUserModal(true)}
             users={hook.usersList} currentUser={user} 
-            onUpdateRole={(id, nome, role) => hook.setConfirmModal({ show: true, title: 'Alterar Cargo', message: `Alterar cargo de "${nome}" para ${role}?`, onConfirm: async () => { await api.patch(`/users/${id}/role`, { role }); hook.showToast('Cargo atualizado!', 'success'); hook.fetchData(); } })} 
+            onUpdateRole={(id, nome, role) => hook.setConfirmModal({ show: true, title: 'Alterar Cargo', message: `Alterar cargo de "${nome}" para ${role}?`, onConfirm: async () => { await api.patch(`/users/${id}/role`, { role }); hook.showToast('Cargo updated!', 'success'); hook.fetchData(); } })} 
             onDelete={(id, nome) => hook.setConfirmModal({ show: true, title: 'Remover Acesso', message: `Remover o servidor "${nome}"?`, onConfirm: async () => { await api.delete(`/users/${id}`); hook.showToast('Usuário removido.', 'success'); hook.fetchData(); } })}
           />
         )}
@@ -79,7 +93,7 @@ export default function AdminDashboard() {
         promptModal={hook.promptModal} setPromptModal={hook.setPromptModal} 
       />
       
-      {/* TOAST FLUTUANTE SUBSTITUINDO O ALERT */}
+      {/* TOAST FLUTUANTE */}
       {hook.toast.show && (
         <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-4 rounded-lg shadow-2xl text-white font-medium text-sm animate-in slide-in-from-bottom-8 fade-in duration-300 ${
           hook.toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'

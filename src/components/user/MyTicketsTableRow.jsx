@@ -11,9 +11,12 @@ export default function MyTicketsTableRow({
   const dataDoChamado = ticket.createdAt || ticket.data_abertura;
   const dataFechamento = ticket.finished_at || ticket.updatedAt || null;
   const nomeTecnico = ticket.tecnico?.nome || null;
-  const resolucaoVisivel = ticket.resolucao_ti
+  // 🌟 PEGA A RESOLUÇÃO E REMOVE APENAS A TAG DE CANCELAMENTO
+  let resolucaoVisivel = ticket.resolucao_ti
     ?.replace(/\n\s*\n\[(?:CONFIRMADO PELO USUÁRIO|CONFIRMAÇÃO DO USUÁRIO)\]:[\s\S]*$/i, '')
-    .trim();
+    .trim() || '';
+
+  resolucaoVisivel = resolucaoVisivel.replace(/\[CANCELADO PELO USUÁRIO\]:\s*/gi, '');
 
   const handleResponder = (aprovado) => {
     if (!aprovado && !comentario.trim()) {
@@ -48,7 +51,7 @@ export default function MyTicketsTableRow({
       </td>
 
       <td className="py-3 px-3 max-w-xs pt-4">
-        <div className="text-slate-600 break-all whitespace-pre-wrap text-sm leading-relaxed">
+        <div className="text-slate-600 break-words whitespace-pre-wrap text-sm leading-relaxed">
           {isExpanded ? ticket.descricao_problema : ticket.descricao_problema.length > 50 ? `${ticket.descricao_problema.substring(0, 50)}...` : ticket.descricao_problema}
         </div>
         {ticket.descricao_problema.length > 50 && (
