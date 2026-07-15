@@ -20,8 +20,8 @@ export default function TechHistoryTable({ historicoRecente, equipments }) {
       <div className="bg-slate-50 px-6 py-4 border-b flex items-center gap-3">
         <div className="bg-slate-600 p-2 rounded-lg"><History className="w-5 h-5 text-white" /></div>
         <div>
-          <h2 className="text-lg font-bold text-slate-800">Meu Histórico Recente</h2>
-          <p className="text-sm text-slate-500">Últimos chamados que você enviou para confirmação, finalizou ou deu baixa.</p>
+          <h2 className="text-lg font-bold text-slate-800">Meu Histórico de Chamados</h2>
+          <p className="text-sm text-slate-500">Chamados que você enviou para confirmação, finalizou ou deu baixa.</p>
         </div>
       </div>
       
@@ -47,12 +47,12 @@ export default function TechHistoryTable({ historicoRecente, equipments }) {
                 const dataFechamento = tk?.finished_at || tk?.updatedAt || null;
                 const dataAbertura = tk?.createdAt || tk?.data_abertura;
                 
-                // 🌟 BLINDAGEM 3: Converte garantidamente para string para o .replace() não dar tela branca
                 let resolucaoFormatada = (tk?.resolucao_ti || '').toString();
                 resolucaoFormatada = resolucaoFormatada.replace(/\[(?:CONFIRMADO PELO USUÁRIO|CONFIRMAÇÃO DO USUÁRIO)\]:\s*(.+)/gi, 'Confirmação do Usuário: "$1"');
                 resolucaoFormatada = resolucaoFormatada.replace(/\[RECUSADO PELO USUÁRIO\]:\s*(.+)/gi, 'Recusa do Usuário: "$1"');
                 resolucaoFormatada = resolucaoFormatada.replace(/\[CANCELADO PELO USUÁRIO\]:\s*(.+)/gi, 'Cancelado pelo Usuário: "$1"');
                 resolucaoFormatada = resolucaoFormatada.replace(/\[SISTEMA\]:\s*(.+)/gi, 'Sistema: "$1"');
+                resolucaoFormatada = resolucaoFormatada.replace(/\[OBSERVAÇÃO DO SUPORTE\]:\s*(.+)/gi, 'Observação do Suporte: "$1"');
 
                 return (
                   <tr key={tk?.id} className="hover:bg-slate-50 transition align-top">

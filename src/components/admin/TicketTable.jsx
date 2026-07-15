@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react'; 
 import TicketTableRow from './TicketTableRow';
 
-export default function TicketTable({ tickets, equipments, usersList, filter, onUpdateStatus, onAssignTechnician }) {
+export default function TicketTable({ tickets, equipments, usersList, filter, onUpdateStatus, onAssignTechnician, onDevolverClick }) {
   const [expandedTickets, setExpandedTickets] = useState({});
   const [searchCode, setSearchCode] = useState('');
   
@@ -97,6 +97,7 @@ export default function TicketTable({ tickets, equipments, usersList, filter, on
                   onToggleExpand={toggleExpandirChamado}
                   onAssignTechnician={onAssignTechnician}
                   onUpdateStatus={onUpdateStatus}
+                  onDevolverClick={onDevolverClick}
                   // Corrigido para as novas regras de paginação dinâmica
                   isLast={index >= currentTickets.length - 4} 
                   isLastTech={index >= currentTickets.length - 1}

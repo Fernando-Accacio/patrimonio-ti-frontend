@@ -1,8 +1,8 @@
 import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { useUserDashboard } from '../hooks/useUserDashboard';
 
+import { useUserDashboard } from '../hooks/useUserDashboard'; // Ajuste os caminhos (../) se necessário
 import Header from '../components/layout/Header';
 import TicketForm from '../components/user/TicketForm';
 import MyTicketsTable from '../components/user/MyTicketsTable';
@@ -16,15 +16,27 @@ export default function UserDashboard() {
   const navigate = useNavigate();
   const hook = useUserDashboard(user, logoutContext, navigate);
 
-  // 🌟 FUNÇÃO QUE PROCESSA A RESPOSTA DO USUÁRIO
+  // 🌟 CORREÇÃO DEFINITIVA: Rota direta alinhada com o backend Fastify
   const handleResponderConfirmacao = async (ticketId, aprovado, motivo) => {
     try {
-      await responderConfirmacaoTicket(ticketId, aprovado, motivo);
-      hook.showToast(`Chamado ${aprovado ? 'finalizado' : 'retornado para a TI'} com sucesso!`, 'success');
-      hook.carregarDados();
+      // Envia os dados exatamente como a sua Service/Controller esperam receber no Body
+      await api.post(`/tickets/${ticketId}/responder-confirmacao`, { 
+        aprovado, 
+        motivo 
+      });
+
+      hook.showToast(
+        `Chamado ${aprovado ? 'finalizado com sucesso!' : 'retornado para a fila da TI.'}`, 
+        'success'
+      );
+      
+      hook.carregarDados(); // Atualiza o painel na hora
     } catch (error) {
-      console.error(error);
-      hook.showToast(error.response?.data?.error || 'Erro ao processar resposta.', 'error');
+      console.error("Erro na confirmação:", error);
+      hook.showToast(
+        error.response?.data?.error || 'Erro ao processar resposta de confirmação.', 
+        'error'
+      );
     }
   };
 
@@ -48,9 +60,9 @@ export default function UserDashboard() {
           <MyTicketsTable 
             tickets={hook.meusChamados} 
             equipments={hook.equipments} 
-            onEditClick={hook.handleIniciarEdicao} 
+            // 🌟 CORREÇÃO AQUI: Agora aponta para a função direta que envia a resposta para a API!
+            onEditClick={hook.handleSalvarEdicaoDireta} 
             onCancelTicketClick={hook.handleCancelarChamado}
-            // 🌟 PASSANDO A PROP PARA A TABELA
             onResponderConfirmacao={handleResponderConfirmacao}
           />
         </div>

@@ -11,6 +11,7 @@ import TicketTable from '../components/admin/TicketTable';
 import UserManagementTable from '../components/admin/UserManagementTable';
 import ResetRequestsTable from '../components/admin/ResetRequestsTable';
 import ResetHistoryTable from '../components/admin/ResetHistoryTable'; 
+import ModalDevolucao from '../components/modals/ModalDevolucao';
 
 import EquipmentFormModal from '../components/modals/EquipmentFormModal';
 import UserProfileModal from '../components/modals/UserProfileModal';
@@ -40,14 +41,7 @@ export default function AdminDashboard() {
       <main className="max-w-7xl mx-auto px-4 py-8 space-y-8">
         {hook.activeTab === 'dashboard' && (
           <>
-            {/* 1º: Tabela de Equipamentos agora no topo */}
-            <EquipmentTable 
-              equipments={hook.equipments} 
-              onNewClick={() => hook.setShowModal(true)} 
-              onDeleteClick={hook.handleDeletarEquipamentoManual} 
-            />
-
-            {/* 2º: Stats de Filtros logo abaixo dos Equipamentos Recentes */}
+            {/* 🌟 STATS (Estatísticas e Filtros) ficam no topo agora */}
             <DashboardStats 
               equipments={hook.equipments} 
               tickets={hook.tickets} 
@@ -55,7 +49,7 @@ export default function AdminDashboard() {
               setFilter={hook.setStatusFilter} 
             />
 
-            {/* 3º: Tabela de Gestão de Chamados (Paginada) no final */}
+            {/* 🌟 TABELA GERAL (Paginação) logo abaixo */}
             <TicketTable 
               tickets={hook.tickets} 
               equipments={hook.equipments} 
@@ -63,6 +57,7 @@ export default function AdminDashboard() {
               filter={hook.statusFilter} 
               onUpdateStatus={hook.handleAlterarStatusChamado} 
               onAssignTechnician={hook.handleAtribuirTecnico} 
+              onDevolverClick={hook.openDevolverModal} 
             />
           </>
         )}
@@ -91,6 +86,13 @@ export default function AdminDashboard() {
         alertModal={{ show: false, title: '', message: '' }} setAlertModal={() => {}} 
         confirmModal={hook.confirmModal} setConfirmModal={hook.setConfirmModal} 
         promptModal={hook.promptModal} setPromptModal={hook.setPromptModal} 
+      />
+      <ModalDevolucao 
+        show={hook.showDevolverModal}
+        onClose={() => hook.setShowDevolverModal(false)}
+        onSubmit={hook.handleDevolverChamadoSubmit}
+        ticket={hook.ticketParaDevolver}
+        equipments={hook.equipments}
       />
       
       {/* TOAST FLUTUANTE */}

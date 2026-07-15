@@ -15,7 +15,6 @@ export function useUserDashboard(user, logoutContext, navigate) {
   const [tecnicoIdSelecionado, setTecnicoIdSelecionado] = useState(''); 
   const [editingTicketId, setEditingTicketId] = useState(null);
 
-  // NOVO: Controle do Modal Inteligente de Justificativa
   const [promptModal, setPromptModal] = useState({ show: false, title: '', placeholder: '', inputValue: '', onConfirm: null, isPassword: false });
 
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
@@ -72,12 +71,11 @@ export function useUserDashboard(user, logoutContext, navigate) {
     setDescricao(''); setPatrimonio(''); setTipo(''); setLocalizacao(''); setTecnicoIdSelecionado('');
   };
 
-  // NOVO: Função para disparar a rota de cancelamento usando o modal interno
   const handleCancelarChamado = (ticketId) => {
     setPromptModal({
       show: true,
       title: 'Cancelar Solicitação',
-      placeholder: 'Explique o motivo do cancelamento (Ex: Resolvi sozinho / Não é mais necessário)...',
+      placeholder: 'Explique o motivo do cancelamento...',
       inputValue: '',
       isPassword: false,
       onConfirm: async (motivo) => {
@@ -94,6 +92,17 @@ export function useUserDashboard(user, logoutContext, navigate) {
         }
       }
     });
+  };
+
+  // 🌟 FUNÇÃO DE SALVAMENTO DIRETO COMPATÍVEL COM O PAYLOAD DO USER
+  const handleSalvarEdicaoDireta = async (ticketId, payload) => {
+    try {
+      await api.put(`/tickets/${ticketId}`, payload);
+      showToast('Resposta enviada para o suporte!', 'success');
+      carregarDados();
+    } catch (error) {
+      showToast(error.response?.data?.error || 'Erro ao responder.', 'error');
+    }
   };
 
   const handleSubmitForm = async (e) => {
@@ -121,7 +130,8 @@ export function useUserDashboard(user, logoutContext, navigate) {
     tecnicosDisponiveis, tecnicoIdSelecionado, setTecnicoIdSelecionado,
     patrimonio, setPatrimonio, tipo, setTipo, localizacao, setLocalizacao,
     descricao, setDescricao, editingTicketId, toast, setToast, showToast,
-    promptModal, setPromptModal, handleCancelarChamado, // Exportado os novos controles
-    handleIniciarEdicao, handleCancelarEdicao, handleSubmitForm, carregarDados
+    promptModal, setPromptModal, handleCancelarChamado,
+    handleIniciarEdicao, handleCancelarEdicao, handleSubmitForm, carregarDados,
+    handleSalvarEdicaoDireta
   };
 }

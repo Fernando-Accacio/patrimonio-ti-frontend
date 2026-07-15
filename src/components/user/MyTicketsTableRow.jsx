@@ -1,37 +1,65 @@
 import React, { useState } from 'react';
-import { Edit2, UserCircle, AlertTriangle, Info, Wrench } from 'lucide-react';
+import { Edit2, UserCircle, AlertTriangle, Wrench, Send } from 'lucide-react';
 
 export default function MyTicketsTableRow({ 
   ticket, equipments, isExpanded, onToggleExpand, onEditClick, onCancelTicketClick, 
   onResponderConfirmacao
 }) {
   const [comentario, setComentario] = useState('');
+  const [comentarioDevolucao, setComentarioDevolucao] = useState('');
   const [erroConfirmacao, setErroConfirmacao] = useState('');
   const matchedEq = equipments.find(e => e.id === ticket.equipment_id);
   const dataDoChamado = ticket.createdAt || ticket.data_abertura;
   const dataFechamento = ticket.finished_at || ticket.updatedAt || null;
   const nomeTecnico = ticket.tecnico?.nome || null;
-  
-  let resolucaoVisivel = ticket.resolucao_ti
+
+  let resolucaoVisivel = (ticket.resolucao_ti || '').toString();
+
+  resolucaoVisivel = resolucaoVisivel
     ?.replace(/\n\s*\n\[(?:CONFIRMADO PELO USUÁRIO|CONFIRMAÇÃO DO USUÁRIO)\]:[\s\S]*$/i, '')
     .trim() || '';
 
   resolucaoVisivel = resolucaoVisivel.replace(/\[CANCELADO PELO USUÁRIO\]:\s*/gi, '');
+
+  // 🌟 ATUALIZADO: Substituição exata idêntica ao painel do Admin
+  resolucaoVisivel = resolucaoVisivel.replace(/\[CONFIRMAÇÃO DO USUÁRIO\]:\s*(.+)/gi, 'Resposta do Usuário: "$1"');
+  resolucaoVisivel = resolucaoVisivel.replace(/\[RECUSADO PELO USUÁRIO\]:\s*(.+)/gi, 'Recusa do Usuário: "$1"');
+  resolucaoVisivel = resolucaoVisivel.replace(/\[SISTEMA\]:\s*(.+)/gi, 'Sistema: "$1"');
+  resolucaoVisivel = resolucaoVisivel.replace(/\[OBSERVAÇÃO DO SUPORTE\]:\s*(.+)/gi, 'Observação do Suporte: "$1"');
 
   const handleResponder = (aprovado) => {
     if (!aprovado && !comentario.trim()) {
       setErroConfirmacao('Digite o que faltou para concluir antes de retornar o chamado.');
       return;
     }
-
     setErroConfirmacao('');
     onResponderConfirmacao(ticket.id, aprovado, comentario.trim());
   };
 
+  const handleEnviarRespostaSuporte = (e) => {
+    e.preventDefault();
+    if (!comentarioDevolucao.trim()) return;
+    
+    // Payload completo casado com as exigências de Schema do Fastify
+    onEditClick(ticket.id, {
+      descricao_problema: ticket.descricao_problema,
+      patrimonio: matchedEq ? matchedEq.patrimonio : '',
+      tipo: matchedEq ? matchedEq.tipo : '',
+      localizacao: matchedEq ? matchedEq.observacao : '',
+      resposta_observacao: comentarioDevolucao.trim()
+    });
+    setComentarioDevolucao('');
+  };
+
+  const textoOriginal = (ticket.resolucao_ti || '').toString();
+  const indexSuporte = textoOriginal.lastIndexOf('[OBSERVAÇÃO DO SUPORTE]');
+  const indexUsuario = textoOriginal.lastIndexOf('[CONFIRMAÇÃO DO USUÁRIO]');
+  
+  const temObservacaoPendente = indexSuporte > -1 && indexSuporte > indexUsuario && ticket.status_chamado === 'Aberto';
+
   return (
     <tr className={`border-b align-top transition ${ticket.status_chamado === 'Cancelado' ? 'bg-slate-50/50 opacity-70' : 'hover:bg-slate-50'}`}>
       
-      {/* 🌟 COLUNA NOVA: Nº DO PROCESSO */}
       <td className="py-3 px-3 align-top text-center pt-4">
         <span className={`inline-block px-2.5 py-1 text-xs font-bold rounded border ${ticket.codigo_processo ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-slate-100 text-slate-400 border-slate-200 font-medium'}`}>
           {ticket.codigo_processo || 'Antigo / N/A'}
@@ -58,7 +86,7 @@ export default function MyTicketsTableRow({
         </div>
       </td>
 
-      <td className="py-3 px-3 max-w-xs pt-4">
+      <td className="py-3 px-3 pt-4 min-w-[350px] max-w-[450px] whitespace-normal">
         <div className="text-slate-600 break-words whitespace-pre-wrap text-sm leading-relaxed">
           {isExpanded ? ticket.descricao_problema : ticket.descricao_problema.length > 50 ? `${ticket.descricao_problema.substring(0, 50)}...` : ticket.descricao_problema}
         </div>
@@ -68,29 +96,38 @@ export default function MyTicketsTableRow({
           </button>
         )}
         
-        {resolucaoVisivel && (
-          <div className={`mt-3 p-3 border border-slate-200 border-l-4 rounded-r-lg text-sm shadow-xs bg-slate-50 ${
-            ticket.status_chamado === 'Cancelado' ? 'border-l-slate-400' : 'border-l-emerald-500'
-          }`}>
-            <strong className={`flex items-center gap-1.5 mb-1 font-bold text-xs uppercase tracking-wider ${
-              ticket.status_chamado === 'Cancelado' ? 'text-slate-500' : 'text-emerald-700'
-            }`}>
-              {ticket.status_chamado === 'Cancelado' 
-                ? <><Info className="w-3.5 h-3.5" /> Histórico de Cancelamento:</> 
-                : <><Wrench className="w-3.5 h-3.5" /> Resposta do Suporte:</>
-              }
+        {/* Caixinha com a Borda Verde-Esmeralda unificada */}
+        {(ticket.resolucao_ti || '').toString().trim() && (
+          <div className="mt-3 p-3 border border-slate-200 border-l-4 rounded-r-lg text-sm shadow-xs bg-slate-50 w-full min-w-[320px] max-w-[400px] border-l-emerald-500">
+            <strong className="flex items-center gap-1.5 mb-1 font-bold text-xs uppercase tracking-wider text-emerald-700">
+              <Wrench className="w-3.5 h-3.5" /> Histórico de Diálogo:
             </strong>
-            <p className="font-medium text-slate-700 leading-relaxed bg-white/80 p-2 rounded border border-slate-100 mt-1 break-words">
+            <div className="font-medium text-slate-700 leading-relaxed bg-white/80 p-2 rounded border border-slate-100 mt-1 break-words whitespace-pre-wrap">
               {resolucaoVisivel}
-            </p>
-            {ticket.status_chamado === 'Aguardando Confirmação' && ticket.finalizador?.nome && (
-              <p className="mt-2 text-[12px] font-semibold text-purple-700 bg-purple-50 border border-purple-100 rounded px-2 py-2">
-                Sua análise ainda está aguardando confirmação após o atendimento de {ticket.finalizador.nome}.
-              </p>
+            </div>
+            
+            {/* Campo de resposta rápida: some após o submit por conta do cálculo de indexes */}
+            {temObservacaoPendente && (
+              <form onSubmit={handleEnviarRespostaSuporte} className="mt-3 pt-3 border-t border-slate-200/60 flex flex-col gap-2">
+                <span className="text-[11px] font-bold text-amber-700 uppercase">Responder Dúvida do Suporte:</span>
+                <div className="flex gap-1.5">
+                  <input 
+                    type="text" 
+                    placeholder="Ex: Está correto sim, pode prosseguir!" 
+                    className="text-xs p-1.5 border rounded border-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white flex-1"
+                    value={comentarioDevolucao}
+                    onChange={(e) => setComentarioDevolucao(e.target.value)}
+                  />
+                  <button type="submit" className="bg-amber-600 hover:bg-amber-700 text-white rounded p-1.5 flex items-center justify-center transition cursor-pointer">
+                    <Send className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </form>
             )}
-            {ticket.status_chamado === 'Aguardando Confirmação' && (
-              <p className="mt-2 text-[11px] font-medium text-slate-500 bg-slate-50 border border-slate-100 rounded px-2 py-1.5">
-                Se você não confirmar a solução, o sistema fará a confirmação automática em 3 dias.
+
+            {ticket.status_chamado === 'Aguardando Confirmação' && ticket.finalizador?.nome && (
+              <p className="mt-2 text-[12px] font-semibold text-purple-700 bg-purple-50 border border-purple-100 rounded px-2 py-2 leading-snug">
+                Sua análise ainda está aguardando confirmação após o atendimento de {ticket.finalizador.nome}.
               </p>
             )}
           </div>

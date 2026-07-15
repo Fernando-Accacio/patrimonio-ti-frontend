@@ -78,7 +78,7 @@ export default function MyTicketsTable({ tickets, equipments, onEditClick, onCan
               <th className="py-2 px-3 text-center whitespace-nowrap">Nº Processo</th>
               <th className="py-2 px-3 whitespace-nowrap">Data / Horário</th>
               <th className="py-2 px-3 whitespace-nowrap">Patrimônio</th> 
-              <th className="py-2 px-3 w-1/2">Problema</th>
+              <th className="py-2 px-3 w-[400px] max-w-[400px]">Problema</th>
               <th className="py-2 px-3 text-center whitespace-nowrap">Responsável</th>
               <th className="py-2 px-3 text-center whitespace-nowrap">Status</th>
               <th className="py-2 px-3 text-center whitespace-nowrap">Ações</th>

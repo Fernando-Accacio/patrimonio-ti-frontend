@@ -17,6 +17,10 @@ export function useAdminDashboard(user, logoutContext, navigate) {
   const [showModal, setShowModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showUserModal, setShowUserModal] = useState(false); 
+  
+  // 🌟 NOVO: Controle do Modal de Devolução
+  const [showDevolverModal, setShowDevolverModal] = useState(false);
+  const [ticketParaDevolver, setTicketParaDevolver] = useState(null);
 
   // Payloads de novos cadastros
   const [novoEq, setNovoEq] = useState({ patrimonio: '', tipo: '', observacao: '' });
@@ -26,7 +30,6 @@ export function useAdminDashboard(user, logoutContext, navigate) {
   const [confirmModal, setConfirmModal] = useState({ show: false, title: '', message: '', onConfirm: null });
   const [promptModal, setPromptModal] = useState({ show: false, title: '', placeholder: '', inputValue: '', onConfirm: null, isPassword: false, allowEmpty: false });
   
-  // NOVO: Controle do Toast
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
   const showToast = (message, type = 'success') => {
@@ -170,22 +173,48 @@ export function useAdminDashboard(user, logoutContext, navigate) {
     } catch (err) { showToast(err.response?.data?.error, 'error'); }
   };
 
-  // 🌟 NOVA FUNÇÃO: Dispara a atribuição de técnico para a API
   const handleAtribuirTecnico = async (ticketId, tecnicoId) => {
     try {
       const payloadId = tecnicoId === "" ? null : tecnicoId;
       await api.patch(`/tickets/${ticketId}/assign`, { tecnico_id: payloadId });
       showToast('Responsável pelo chamado atualizado!', 'success');
-      fetchData(); // Recarrega os dados da tela
+      fetchData(); 
     } catch (err) {
       showToast(err.response?.data?.error || 'Erro ao atribuir técnico.', 'error');
     }
   };
 
+  const handleDevolverChamadoSubmit = async (ticketId, payload) => {
+    try {
+      await api.patch(`/tickets/${ticketId}/devolver`, payload);
+      
+      // 🌟 A MÁGICA AQUI: Remove o "visto" do localStorage para reativar o alerta piscante
+      localStorage.removeItem(`alerta_visto_${ticketId}`);
+
+      setShowDevolverModal(false);
+      setTicketParaDevolver(null);
+      showToast('Chamado devolvido para correção do usuário!', 'success');
+      fetchData();
+    } catch (err) {
+      showToast(err.response?.data?.error || 'Erro ao devolver chamado.', 'error');
+    }
+  };
+
+  // 🌟 NOVA FUNÇÃO: Abre o modal de devolução (será passado para a tabela)
+  const openDevolverModal = (ticket) => {
+    setTicketParaDevolver(ticket);
+    setShowDevolverModal(true);
+  };
+
   return {
     equipments, tickets, usersList, resetRequests, resetHistory, loading, activeTab, setActiveTab, statusFilter, setStatusFilter,
-    showModal, setShowModal, showProfileModal, setShowProfileModal, showUserModal, setShowUserModal, novoEq, setNovoEq, novoUser, setNovoUser,
-    confirmModal, setConfirmModal, promptModal, setPromptModal, toast, setToast, showToast, // Exportando as funções do Toast
-    handleDeletarEquipamentoManual, handleAlterarStatusChamado, handleCadastrarEquipamento, handleCadastrarUsuario, handleAprovarReset, handleRecusarReset, handleAtribuirTecnico, fetchData
+    showModal, setShowModal, showProfileModal, setShowProfileModal, showUserModal, setShowUserModal, 
+    novoEq, setNovoEq, novoUser, setNovoUser,
+    confirmModal, setConfirmModal, promptModal, setPromptModal, toast, setToast, showToast, 
+    showDevolverModal, setShowDevolverModal, ticketParaDevolver, // 🌟 Exportando estados do novo modal
+    handleDeletarEquipamentoManual, handleAlterarStatusChamado, handleCadastrarEquipamento, 
+    handleCadastrarUsuario, handleAprovarReset, handleRecusarReset, handleAtribuirTecnico, 
+    handleDevolverChamadoSubmit, openDevolverModal, // 🌟 Exportando as funções
+    fetchData
   };
 }
