@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Edit2, UserCircle, AlertTriangle, Info, Wrench, Check } from 'lucide-react';
+import { Edit2, UserCircle, AlertTriangle, Info, Wrench } from 'lucide-react';
 
 export default function MyTicketsTableRow({ 
   ticket, equipments, isExpanded, onToggleExpand, onEditClick, onCancelTicketClick, 
@@ -11,7 +11,7 @@ export default function MyTicketsTableRow({
   const dataDoChamado = ticket.createdAt || ticket.data_abertura;
   const dataFechamento = ticket.finished_at || ticket.updatedAt || null;
   const nomeTecnico = ticket.tecnico?.nome || null;
-  // 🌟 PEGA A RESOLUÇÃO E REMOVE APENAS A TAG DE CANCELAMENTO
+  
   let resolucaoVisivel = ticket.resolucao_ti
     ?.replace(/\n\s*\n\[(?:CONFIRMADO PELO USUÁRIO|CONFIRMAÇÃO DO USUÁRIO)\]:[\s\S]*$/i, '')
     .trim() || '';
@@ -30,8 +30,16 @@ export default function MyTicketsTableRow({
 
   return (
     <tr className={`border-b align-top transition ${ticket.status_chamado === 'Cancelado' ? 'bg-slate-50/50 opacity-70' : 'hover:bg-slate-50'}`}>
+      
+      {/* 🌟 COLUNA NOVA: Nº DO PROCESSO */}
+      <td className="py-3 px-3 align-top text-center pt-4">
+        <span className={`inline-block px-2.5 py-1 text-xs font-bold rounded border ${ticket.codigo_processo ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-slate-100 text-slate-400 border-slate-200 font-medium'}`}>
+          {ticket.codigo_processo || 'Antigo / N/A'}
+        </span>
+      </td>
+
       <td className="py-3 px-3 text-sm font-medium text-slate-500 pt-4">
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 whitespace-nowrap">
           <span>Abertura: {dataDoChamado ? new Date(dataDoChamado).toLocaleString('pt-BR') : 'Sem data'}</span>
           <span>Fechamento: {dataFechamento ? new Date(dataFechamento).toLocaleString('pt-BR') : (ticket.status_chamado === 'Aguardando Confirmação' ? 'Aguardando confirmação' : 'Em aberto')}</span>
         </div>
@@ -61,7 +69,6 @@ export default function MyTicketsTableRow({
         )}
         
         {resolucaoVisivel && (
-          /* 🌟 DESIGN PREMIUM UNIFICADO COM O ADMIN */
           <div className={`mt-3 p-3 border border-slate-200 border-l-4 rounded-r-lg text-sm shadow-xs bg-slate-50 ${
             ticket.status_chamado === 'Cancelado' ? 'border-l-slate-400' : 'border-l-emerald-500'
           }`}>
