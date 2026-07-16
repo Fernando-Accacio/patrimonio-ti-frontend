@@ -88,7 +88,13 @@ export default function TicketTableRow({
         
         {!isFinalizado && (
           <button 
-            onClick={() => onDevolverClick(ticket)} 
+            type="button"
+            onClick={() => onDevolverClick({
+              ...ticket,
+              equipment_type_id: eq ? eq.equipment_type_id : null,
+              sector_id: eq ? eq.sector_id : null,
+              patrimonio: eq ? eq.patrimonio : ''
+            })} 
             className="mt-2 text-[10px] font-bold text-amber-600 hover:text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200 flex items-center gap-1 transition cursor-pointer"
           >
             <Info className="w-3 h-3" /> Editar Pat. ou Devolver

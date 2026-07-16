@@ -18,7 +18,7 @@ export default function AlertModal({ show, title, message, type = 'info', onClos
           <h3 className="font-bold">{title}</h3>
         </div>
         <div className="p-6 text-slate-600 text-sm">
-          {message}
+          {message}A
         </div>
         <div className="p-4 bg-slate-50 border-t flex justify-end">
           <button 

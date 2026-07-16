@@ -57,7 +57,8 @@ export default function TechDropdown({ ticketId, tecnicos, atualTecnico, isFinal
   }
 
   return (
-    <div className={`relative w-full text-left ${isOpen ? 'z-50' : 'z-10'}`}>
+    // 🌟 1. Aumentamos o z-index quando aberto para [9999] e removemos z-10 padrão para não bugar a tabela
+    <div className={`relative w-full text-left ${isOpen ? 'z-[9999]' : ''}`}>
       <button
         ref={buttonRef}
         type="button"
@@ -77,13 +78,14 @@ export default function TechDropdown({ ticketId, tecnicos, atualTecnico, isFinal
 
       {isOpen && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div ref={menuRef} className={`absolute left-0 right-0 bg-white border border-slate-200 rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto divide-y divide-slate-100 animate-in fade-in duration-150 ${
+          <div className="fixed inset-0 z-[9998]" onClick={() => setIsOpen(false)} />
+          {/* 🌟 2. Adicionamos z-[9999] e fixamos a largura no menu para ele pular pra fora das limitações de corte */}
+          <div ref={menuRef} className={`absolute left-0 w-full min-w-[160px] bg-white border border-slate-200 rounded-lg shadow-2xl z-[9999] max-h-60 overflow-y-auto divide-y divide-slate-100 animate-in fade-in duration-150 ${
             openDirection === 'up' ? 'bottom-full mb-1 slide-in-from-bottom-2' : 'top-full mt-1 slide-in-from-top-2'
           }`}>
             <button 
               type="button" 
-              onClick={() => { onAssignTechnician(ticketId, null); setIsOpen(false); }} // 🌟 Mudado de "" para null
+              onClick={() => { onAssignTechnician(ticketId, null); setIsOpen(false); }} 
               className="w-full text-left px-4 py-2.5 text-xs font-bold text-amber-700 hover:bg-amber-50 transition cursor-pointer"
             >
               Aguardando...

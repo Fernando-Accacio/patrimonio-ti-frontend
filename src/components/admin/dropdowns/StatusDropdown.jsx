@@ -82,7 +82,8 @@ export default function StatusDropdown({ ticketId, currentStatus, tecnicoId, isF
   }
 
   return (
-    <div className={`relative w-full text-left ${isOpen ? 'z-50' : 'z-10'}`}>
+    // 🌟 1. Ajustado o wrapper para usar z-[9999] quando aberto, garantindo prioridade total
+    <div className={`relative w-full text-left ${isOpen ? 'z-[9999]' : ''}`}>
       <button
         ref={buttonRef}
         type="button"
@@ -102,8 +103,11 @@ export default function StatusDropdown({ ticketId, currentStatus, tecnicoId, isF
 
       {isOpen && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div ref={menuRef} className={`absolute left-0 right-0 bg-white border border-slate-200 rounded-lg shadow-xl z-50 overflow-hidden divide-y divide-slate-100 animate-in fade-in duration-150 ${
+          {/* 🌟 2. O backdrop fixo que cobre a tela inteira (z-[9998]) */}
+          <div className="fixed inset-0 z-[9998]" onClick={() => setIsOpen(false)} />
+          
+          {/* 🌟 3. A caixa do menu agora tem z-[9999] e min-w-[160px] */}
+          <div ref={menuRef} className={`absolute left-0 w-full min-w-[160px] bg-white border border-slate-200 rounded-lg shadow-2xl z-[9999] overflow-hidden divide-y divide-slate-100 animate-in fade-in duration-150 ${
             openDirection === 'up' ? 'bottom-full mb-1 slide-in-from-bottom-2' : 'top-full mt-1 slide-in-from-top-2'
           }`}>
             {options.map(opt => {

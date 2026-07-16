@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import MyTicketsTableRow from './MyTicketsTableRow';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-export default function MyTicketsTable({ tickets, equipments, onEditClick, onCancelTicketClick, onResponderConfirmacao }) {
+export default function MyTicketsTable({ tickets, equipments, onEditClick, onCancelTicketClick, onResponderConfirmacao, onFastReply }) {
   const [expandedTickets, setExpandedTickets] = useState({});
   
   // 🌟 ESTADOS DA PAGINAÇÃO
@@ -78,7 +78,7 @@ export default function MyTicketsTable({ tickets, equipments, onEditClick, onCan
               <th className="py-2 px-3 text-center whitespace-nowrap">Nº Processo</th>
               <th className="py-2 px-3 whitespace-nowrap">Data / Horário</th>
               <th className="py-2 px-3 whitespace-nowrap">Patrimônio</th> 
-              <th className="py-2 px-3 w-[400px] max-w-[400px]">Problema</th>
+              <th className="py-2 px-3 min-w-[300px] max-w-[400px]">Problema</th>
               <th className="py-2 px-3 text-center whitespace-nowrap">Responsável</th>
               <th className="py-2 px-3 text-center whitespace-nowrap">Status</th>
               <th className="py-2 px-3 text-center whitespace-nowrap">Ações</th>
@@ -98,6 +98,7 @@ export default function MyTicketsTable({ tickets, equipments, onEditClick, onCan
                   onEditClick={onEditClick}
                   onCancelTicketClick={onCancelTicketClick}
                   onResponderConfirmacao={onResponderConfirmacao}
+                  onFastReply={onFastReply} // 🌟 Passando adiante para a linha!
                 />
               ))
             )}

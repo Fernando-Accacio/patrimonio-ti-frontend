@@ -12,6 +12,7 @@ export function useUserDashboard(user, logoutContext, navigate) {
   const [filtroStatus, setFiltroStatus] = useState('Todos');
 
   const [patrimonio, setPatrimonio] = useState('');
+  // 🌟 Importante: 'tipo' agora guarda o equipment_type_id, e 'localizacao' guarda o sector_id
   const [tipo, setTipo] = useState('');
   const [localizacao, setLocalizacao] = useState('');
   const [descricao, setDescricao] = useState('');
@@ -64,8 +65,9 @@ export function useUserDashboard(user, logoutContext, navigate) {
     setTecnicoIdSelecionado(ticket.tecnico_id || '');
     if (matchedEq) {
       setPatrimonio(matchedEq.patrimonio);
-      setTipo(matchedEq.tipo);
-      setLocalizacao(matchedEq.observacao || '');
+      // 🌟 Atualizado: Carrega os IDs em vez das antigas strings
+      setTipo(matchedEq.equipment_type_id || '');
+      setLocalizacao(matchedEq.sector_id || '');
     }
   };
 
@@ -110,7 +112,15 @@ export function useUserDashboard(user, logoutContext, navigate) {
   const handleSubmitForm = async (e) => {
     e.preventDefault();
     const tecnicoPayload = tecnicoIdSelecionado ? Number(tecnicoIdSelecionado) : null;
-    const payload = { patrimonio, tipo, localizacao, descricao_problema: descricao, tecnico_id: tecnicoPayload };
+    
+    // 🌟 MÁGICA FINAL AQUI: Trocando os nomes das chaves!
+    const payload = { 
+      patrimonio, 
+      descricao_problema: descricao, 
+      tecnico_id: tecnicoPayload,
+      equipment_type_id: Number(tipo),  // O front manda o que tava no estado 'tipo' com o nome novo
+      sector_id: Number(localizacao)    // O front manda o que tava em 'localizacao' com o nome novo
+    };
 
     try {
       if (editingTicketId) {

@@ -83,9 +83,10 @@ export default function UserDashboard() {
           <MyTicketsTable 
             tickets={hook.chamadosFiltrados} // 🌟 PASSANDO A LISTA JÁ FILTRADA!
             equipments={hook.equipments} 
-            onEditClick={hook.handleSalvarEdicaoDireta} 
+            onEditClick={hook.handleIniciarEdicao} 
             onCancelTicketClick={hook.handleCancelarChamado}
             onResponderConfirmacao={handleResponderConfirmacao}
+            onFastReply={hook.handleSalvarEdicaoDireta}
           />
         </div>
       </main>

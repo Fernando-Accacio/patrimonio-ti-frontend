@@ -1,42 +1,50 @@
-import React, { useState } from 'react';
-import { Send, X, ChevronDown, Wrench, Building, Search } from 'lucide-react'; 
+import React, { useState, useEffect } from 'react';
+import { Send, X, ChevronDown, Wrench, Building, Search } from 'lucide-react';
+import api from '../../services/api'; // Certifique-se de que o caminho do import da api está correto
 
-// Lista padrão de setores para escolha rápida
-const LISTA_SETORES = [
-  { nome: 'Recursos Humanos', sigla: 'RH' },
-  { nome: 'Tecnologia da Informação', sigla: 'TI' },
-  { nome: 'Financeiro', sigla: 'FIN' },
-  { nome: 'Almoxarifado Central', sigla: 'ALM' },
-  { nome: 'Comercial', sigla: 'COM' },
-  { nome: 'Administrativo', sigla: 'ADM' },
-  { nome: 'Faturamento', sigla: 'FAT' },
-  { nome: 'Gabinete do Prefeito', sigla: 'GAB' },
-  { nome: 'Secretaria de Saúde', sigla: 'SAU' },
-  { nome: 'Secretaria de Educação', sigla: 'EDU' },
-  { nome: 'Protocolo Geral', sigla: 'PROT' },
-  { nome: 'Assessoria Jurídica', sigla: 'JUR' },
-];
-
-export default function TicketForm({ 
-  editingTicketId, onCancel, onSubmit, 
+export default function TicketForm({
+  editingTicketId, onCancel, onSubmit,
   patrimonio, setPatrimonio, tipo, setTipo, localizacao, setLocalizacao, descricao, setDescricao,
-  tecnicosDisponiveis, tecnicoIdSelecionado, setTecnicoIdSelecionado 
+  tecnicosDisponiveis, tecnicoIdSelecionado, setTecnicoIdSelecionado
 }) {
-  // Estado local para controlar a exibição do modal de Setores
   const [showSectorModal, setShowSectorModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Filtra os setores dinamicamente conforme a busca do usuário
-  const filteredSectors = LISTA_SETORES.filter(setor => 
-    setor.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    setor.sigla.toLowerCase().includes(searchTerm.toLowerCase())
+  // 🌟 Novos estados para os dados vindos do banco
+  const [setoresDB, setSetoresDB] = useState([]);
+  const [tiposDB, setTiposDB] = useState([]);
+
+  // 🌟 Busca os setores e tipos ao carregar o componente
+  useEffect(() => {
+    const fetchApoio = async () => {
+      try {
+        const [resSetores, resTipos] = await Promise.all([
+          api.get('/sectors'),
+          api.get('/equipment-types')
+        ]);
+        setSetoresDB(resSetores.data);
+        setTiposDB(resTipos.data);
+      } catch (error) {
+        console.error("Erro ao buscar setores e equipamentos:", error);
+      }
+    };
+    fetchApoio();
+  }, []);
+
+  const filteredSectors = setoresDB.filter(setor =>
+    setor.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    setor.prefixo.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleSelectSector = (nomeSetor) => {
-    setLocalizacao(nomeSetor);
+  const handleSelectSector = (id) => {
+    setLocalizacao(id); // Agora salva o ID (Foreign Key)
     setShowSectorModal(false);
-    setSearchTerm(''); // Limpa a pesquisa
+    setSearchTerm('');
   };
+
+  // Encontra o nome do setor selecionado para exibir no input do formulário
+  const setorSelecionado = setoresDB.find(s => s.id === localizacao);
+  const nomeSetorExibicao = setorSelecionado ? setorSelecionado.nome : '';
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-fit">
@@ -52,31 +60,27 @@ export default function TicketForm({
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Nº do Patrimônio (P.M.I.S)</label>
-          <input 
+          <input
             type="text" required maxLength={11} placeholder="Ex: 46585"
             className="w-full px-3 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-600 outline-none text-sm transition"
             value={patrimonio}
             onChange={(e) => setPatrimonio(e.target.value.replace(/\D/g, '').slice(0, 11))}
           />
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Tipo do Equipamento</label>
           <div className="relative">
-            <select 
-              required 
+            <select
+              required
               className="w-full px-3 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-600 outline-none bg-white appearance-none pr-10 text-sm transition cursor-pointer"
-              value={tipo} 
-              onChange={(e) => setTipo(e.target.value)}
+              value={tipo}
+              onChange={(e) => setTipo(Number(e.target.value))} // 🌟 Converte para número (ID)
             >
               <option value="">Selecione o tipo...</option>
-              <option value="Computador Desktop">Computador Desktop</option>
-              <option value="Notebook">Notebook</option>
-              <option value="Impressora">Impressora</option>
-              <option value="Monitor">Monitor</option>
-              <option value="Telefone IP">Telefone IP</option>
-              <option value="Projetor">Projetor</option>
-              <option value="Outro">Outro</option>
+              {tiposDB.map((eqp) => (
+                <option key={eqp.id} value={eqp.id}>{eqp.nome}</option>
+              ))}
             </select>
             <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
               <ChevronDown className="w-4 h-4" />
@@ -84,21 +88,20 @@ export default function TicketForm({
           </div>
         </div>
 
-        {/* 🌟 CAMPO DE SETOR INTEGRADO COM MODAL */}
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Seu Setor / Departamento</label>
           <div className="relative flex gap-2">
-            <input 
-              type="text" 
-              required 
-              readOnly 
+            <input
+              type="text"
+              required
+              readOnly
               placeholder="Clique para selecionar o setor..."
               className="w-full px-3 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-600 outline-none text-sm transition bg-slate-50 cursor-pointer text-slate-800 font-medium"
-              value={localizacao} 
+              value={nomeSetorExibicao} // 🌟 Mostra o nome, mas o estado guarda o ID!
               onClick={() => setShowSectorModal(true)}
             />
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={() => setShowSectorModal(true)}
               className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold rounded transition flex items-center gap-1.5 cursor-pointer shadow-sm"
             >
@@ -109,7 +112,7 @@ export default function TicketForm({
 
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Descreva o Problema</label>
-          <textarea 
+          <textarea
             required rows="4" placeholder="Explique o que aconteceu com o aparelho..."
             className="w-full px-3 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-600 outline-none resize-none text-sm transition"
             value={descricao} onChange={(e) => setDescricao(e.target.value)}
@@ -122,9 +125,9 @@ export default function TicketForm({
             <Wrench className="w-4 h-4 text-blue-600" /> Atendimento Preferencial
           </label>
           <div className="relative">
-            <select 
+            <select
               className="w-full px-3 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-600 outline-none bg-white appearance-none pr-10 text-xs transition cursor-pointer"
-              value={tecnicoIdSelecionado} 
+              value={tecnicoIdSelecionado}
               onChange={(e) => setTecnicoIdSelecionado(e.target.value)}
             >
               <option value="">Nenhuma preferência (Aguardar Fila Geral)</option>
@@ -163,9 +166,9 @@ export default function TicketForm({
                 <Building className="w-5 h-5 text-blue-600" />
                 <h3 className="text-md font-bold text-slate-800">Selecione o seu Setor</h3>
               </div>
-              <button 
-                type="button" 
-                onClick={() => { setShowSectorModal(false); setSearchTerm(''); }} 
+              <button
+                type="button"
+                onClick={() => { setShowSectorModal(false); setSearchTerm(''); }}
                 className="text-slate-400 hover:text-red-500 transition cursor-pointer"
               >
                 <X className="w-6 h-6" />
@@ -175,8 +178,8 @@ export default function TicketForm({
             {/* Input de Busca */}
             <div className="p-4 border-b bg-slate-50/50">
               <div className="relative">
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="Pesquise o setor pelo nome ou sigla..."
                   className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition"
                   value={searchTerm}
@@ -191,36 +194,29 @@ export default function TicketForm({
               {filteredSectors.length > 0 ? (
                 filteredSectors.map((setor) => (
                   <button
-                    key={setor.sigla}
+                    key={setor.id}
                     type="button"
-                    onClick={() => handleSelectSector(setor.nome)}
+                    onClick={() => handleSelectSector(setor.id)}
                     className="w-full text-left px-4 py-3 hover:bg-blue-50 rounded-lg transition-colors flex items-center justify-between group cursor-pointer"
                   >
                     <span className="text-sm font-semibold text-slate-700 group-hover:text-blue-700">{setor.nome}</span>
                     <span className="text-xs font-bold text-slate-400 group-hover:text-blue-600 bg-slate-100 group-hover:bg-blue-100 px-2 py-0.5 rounded">
-                      {setor.sigla}
+                      {setor.prefixo}
                     </span>
                   </button>
                 ))
               ) : (
                 <div className="py-8 text-center">
                   <p className="text-xs text-slate-400">Nenhum setor encontrado para "{searchTerm}".</p>
-                  <button
-                    type="button"
-                    onClick={() => handleSelectSector(searchTerm)}
-                    className="mt-2 text-xs text-blue-600 font-bold hover:underline"
-                  >
-                    Usar "{searchTerm}" mesmo assim
-                  </button>
                 </div>
               )}
             </div>
 
             {/* Footer */}
             <div className="px-6 py-3 border-t bg-slate-50 flex justify-end">
-              <button 
-                type="button" 
-                onClick={() => { setShowSectorModal(false); setSearchTerm(''); }} 
+              <button
+                type="button"
+                onClick={() => { setShowSectorModal(false); setSearchTerm(''); }}
                 className="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold py-2 px-4 rounded-lg transition cursor-pointer"
               >
                 Cancelar
