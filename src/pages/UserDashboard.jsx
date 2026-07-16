@@ -1,7 +1,6 @@
 import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-// 🌟 IMPORT DA INSTÂNCIA AXIOS PARA FAZER O PATCH CORRETO:
 import api from '../services/api';
 
 import { useUserDashboard } from '../hooks/useUserDashboard';
@@ -10,14 +9,13 @@ import TicketForm from '../components/user/TicketForm';
 import MyTicketsTable from '../components/user/MyTicketsTable';
 import UserProfileModal from '../components/modals/UserProfileModal';
 import GlobalModals from '../components/modals/GlobalModals';
-import { CheckCircle2, AlertCircle, X } from 'lucide-react';
+import { CheckCircle2, AlertCircle, X, ChevronDown } from 'lucide-react'; // 🌟 Importado ChevronDown
 
 export default function UserDashboard() {
   const { user, logoutContext } = useContext(AuthContext); 
   const navigate = useNavigate();
   const hook = useUserDashboard(user, logoutContext, navigate);
 
-  // 🌟 FUNÇÃO CORRIGIDA PARA BATER EXATAMENTE NA ROTA DO BACKEND (PATCH /tickets/:id/confirmar)
   const handleResponderConfirmacao = async (ticketId, aprovado, motivo) => {
     try {
       await api.patch(`/tickets/${ticketId}/confirmar`, { 
@@ -30,7 +28,7 @@ export default function UserDashboard() {
         'success'
       );
       
-      hook.carregarDados(); // Recarrega os dados imediatamente
+      hook.carregarDados(); 
     } catch (error) {
       console.error("Erro na confirmação:", error);
       hook.showToast(
@@ -56,13 +54,37 @@ export default function UserDashboard() {
             tecnicoIdSelecionado={hook.tecnicoIdSelecionado} setTecnicoIdSelecionado={hook.setTecnicoIdSelecionado} 
           />
         </div>
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 space-y-4"> {/* 🌟 Adicionado espaço entre elementos */}
+          
+          {/* 🌟 NOVO: Painel de Controle de Filtros por Status com visual moderno */}
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wider">
+              Minhas Solicitações
+            </h2>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-slate-400 uppercase">Status:</span>
+              <div className="relative flex items-center">
+                <select
+                  value={hook.filtroStatus}
+                  onChange={(e) => hook.setFiltroStatus(e.target.value)}
+                  className="pl-3 pr-8 py-1.5 text-xs font-bold border border-slate-300 rounded-lg outline-none bg-white transition cursor-pointer appearance-none text-slate-700 focus:ring-1 focus:ring-blue-600"
+                >
+                  <option value="Todos">Todos os Status</option>
+                  <option value="Aberto">Abertos</option>
+                  <option value="Aguardando Confirmação">Aguardando Confirmação</option>
+                  <option value="Concluído">Concluídos</option>
+                  <option value="Cancelado">Cancelados</option>
+                </select>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2 pointer-events-none" />
+              </div>
+            </div>
+          </div>
+
           <MyTicketsTable 
-            tickets={hook.meusChamados} 
+            tickets={hook.chamadosFiltrados} // 🌟 PASSANDO A LISTA JÁ FILTRADA!
             equipments={hook.equipments} 
             onEditClick={hook.handleSalvarEdicaoDireta} 
             onCancelTicketClick={hook.handleCancelarChamado}
-            // 🌟 AQUI PASSA A FUNÇÃO QUE BATE NO PATCH:
             onResponderConfirmacao={handleResponderConfirmacao}
           />
         </div>

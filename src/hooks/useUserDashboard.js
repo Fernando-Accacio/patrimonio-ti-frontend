@@ -8,6 +8,9 @@ export function useUserDashboard(user, logoutContext, navigate) {
   const [tecnicosDisponiveis, setTecnicosDisponiveis] = useState([]); 
   const [showProfileModal, setShowProfileModal] = useState(false);
   
+  // 🌟 NOVO: Estado para gerenciar o filtro de chamados selecionado
+  const [filtroStatus, setFiltroStatus] = useState('Todos');
+
   const [patrimonio, setPatrimonio] = useState('');
   const [tipo, setTipo] = useState('');
   const [localizacao, setLocalizacao] = useState('');
@@ -94,7 +97,6 @@ export function useUserDashboard(user, logoutContext, navigate) {
     });
   };
 
-  // 🌟 FUNÇÃO DE SALVAMENTO DIRETO COMPATÍVEL COM O PAYLOAD DO USER
   const handleSalvarEdicaoDireta = async (ticketId, payload) => {
     try {
       await api.put(`/tickets/${ticketId}`, payload);
@@ -125,8 +127,18 @@ export function useUserDashboard(user, logoutContext, navigate) {
     }
   };
 
+  // 🌟 NOVO: Realiza o filtro lógico em tempo real
+  const chamadosFiltrados = meusChamados.filter((ticket) => {
+    if (filtroStatus === 'Todos') return true;
+    return ticket.status_chamado === filtroStatus;
+  });
+
   return {
-    meusChamados, equipments, showProfileModal, setShowProfileModal,
+    meusChamados, 
+    chamadosFiltrados, // 🌟 Retornando a lista filtrada
+    filtroStatus,      // 🌟 Retornando o status selecionado
+    setFiltroStatus,   // 🌟 Retornando a função de alteração do filtro
+    equipments, showProfileModal, setShowProfileModal,
     tecnicosDisponiveis, tecnicoIdSelecionado, setTecnicoIdSelecionado,
     patrimonio, setPatrimonio, tipo, setTipo, localizacao, setLocalizacao,
     descricao, setDescricao, editingTicketId, toast, setToast, showToast,

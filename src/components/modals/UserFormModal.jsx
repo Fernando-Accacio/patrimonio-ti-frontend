@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { X, User, Mail, Hash, Phone, Shield } from 'lucide-react';
+import { X, User, Mail, Hash, Phone, Shield, ChevronDown } from 'lucide-react'; // 🌟 Importado ChevronDown
 
 export default function UserFormModal({ show, onClose, onSubmit, novoUser, setNovoUser }) {
   const [erroLocal, setErroLocal] = useState('');
 
-  // Se a propriedade de exibição do painel for falsa, não renderiza nada
+  // Se a propriedade de execução do painel for falsa, não renderiza nada
   if (!show) return null;
 
   const handleFormSubmit = (e) => {
@@ -125,17 +125,19 @@ export default function UserFormModal({ show, onClose, onSubmit, novoUser, setNo
           {/* Nível de Acesso */}
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Nível de Acesso (Cargo)</label>
-            <div className="relative">
+            <div className="relative flex items-center"> {/* 🌟 Adicionado flex para alinhar verticalmente */}
               <select 
                 value={novoUser?.role || 'USER'} 
                 onChange={(e) => setNovoUser({ ...novoUser, role: e.target.value })}
-                className="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none bg-white transition cursor-pointer appearance-none"
+                className="w-full pl-9 pr-10 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none bg-white transition cursor-pointer appearance-none"
               >
                 <option value="USER">Usuário Comum (Servidor)</option>
                 <option value="TECH">Técnico de Suporte (TI)</option>
                 <option value="ADMIN">Administrador do Sistema</option>
               </select>
-              <Shield className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+              <Shield className="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none" />
+              {/* 🌟 A SETINHA DE INDICAÇÃO MAPEADA NO CANTO DIREITO */}
+              <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 pointer-events-none" />
             </div>
           </div>
 
