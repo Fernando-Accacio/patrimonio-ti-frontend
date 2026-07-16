@@ -124,6 +124,10 @@ export function useAdminDashboard(user, logoutContext, navigate) {
   const handleAlterarStatusChamado = (ticketId, statusAtual, novoStatus) => {
     if (statusAtual === novoStatus) return;
     
+    // 🌟 A MÁGICA AQUI: Sempre que o admin mexer no status, apagamos a memória do "X" do alerta
+    // Assim, se o chamado explodir e voltar depois, o aviso piscará de novo!
+    localStorage.removeItem(`alerta_visto_${ticketId}`);
+    
     if (['Concluído', 'Aguardando Confirmação'].includes(novoStatus)) {
       setPromptModal({
         show: true,

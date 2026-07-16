@@ -1,36 +1,36 @@
 import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+// 🌟 IMPORT DA INSTÂNCIA AXIOS PARA FAZER O PATCH CORRETO:
+import api from '../services/api';
 
-import { useUserDashboard } from '../hooks/useUserDashboard'; // Ajuste os caminhos (../) se necessário
+import { useUserDashboard } from '../hooks/useUserDashboard';
 import Header from '../components/layout/Header';
 import TicketForm from '../components/user/TicketForm';
 import MyTicketsTable from '../components/user/MyTicketsTable';
 import UserProfileModal from '../components/modals/UserProfileModal';
 import GlobalModals from '../components/modals/GlobalModals';
 import { CheckCircle2, AlertCircle, X } from 'lucide-react';
-import { responderConfirmacaoTicket } from '../services/api';
 
 export default function UserDashboard() {
   const { user, logoutContext } = useContext(AuthContext); 
   const navigate = useNavigate();
   const hook = useUserDashboard(user, logoutContext, navigate);
 
-  // 🌟 CORREÇÃO DEFINITIVA: Rota direta alinhada com o backend Fastify
+  // 🌟 FUNÇÃO CORRIGIDA PARA BATER EXATAMENTE NA ROTA DO BACKEND (PATCH /tickets/:id/confirmar)
   const handleResponderConfirmacao = async (ticketId, aprovado, motivo) => {
     try {
-      // Envia os dados exatamente como a sua Service/Controller esperam receber no Body
-      await api.post(`/tickets/${ticketId}/responder-confirmacao`, { 
+      await api.patch(`/tickets/${ticketId}/confirmar`, { 
         aprovado, 
         motivo 
       });
 
       hook.showToast(
-        `Chamado ${aprovado ? 'finalizado com sucesso!' : 'retornado para a fila da TI.'}`, 
+        `Chamado ${aprovado ? 'finalizado com sucesso!' : 'retornado para a TI.'}`, 
         'success'
       );
       
-      hook.carregarDados(); // Atualiza o painel na hora
+      hook.carregarDados(); // Recarrega os dados imediatamente
     } catch (error) {
       console.error("Erro na confirmação:", error);
       hook.showToast(
@@ -60,9 +60,9 @@ export default function UserDashboard() {
           <MyTicketsTable 
             tickets={hook.meusChamados} 
             equipments={hook.equipments} 
-            // 🌟 CORREÇÃO AQUI: Agora aponta para a função direta que envia a resposta para a API!
             onEditClick={hook.handleSalvarEdicaoDireta} 
             onCancelTicketClick={hook.handleCancelarChamado}
+            // 🌟 AQUI PASSA A FUNÇÃO QUE BATE NO PATCH:
             onResponderConfirmacao={handleResponderConfirmacao}
           />
         </div>

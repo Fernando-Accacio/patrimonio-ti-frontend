@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react'; 
 import TicketTableRow from './TicketTableRow';
 
@@ -6,11 +6,14 @@ export default function TicketTable({ tickets, equipments, usersList, filter, on
   const [expandedTickets, setExpandedTickets] = useState({});
   const [searchCode, setSearchCode] = useState('');
   
-  // 🌟 ESTADOS DA PAGINAÇÃO
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Se o usuário mudar o filtro ou digitar na busca, voltamos para a página 1 para evitar bugs de paginação vazia
+  // 🌟 REFS E ESTADOS DA BARRA DE ROLAGEM DUPLA
+  const topScrollRef = useRef(null);
+  const tableScrollRef = useRef(null);
+  const [tableWidth, setTableWidth] = useState(1000);
+
   useEffect(() => {
     setCurrentPage(1);
   }, [filter, searchCode]);
@@ -21,12 +24,16 @@ export default function TicketTable({ tickets, equipments, usersList, filter, on
 
   const tecnicos = usersList.filter(u => u.role === 'TECH');
 
-  // 1. Filtragem e ordenação (A pesquisa pelo código roda na base completa de dados)
   const filteredTickets = tickets
     .sort((a, b) => b.id - a.id)
     .filter(tk => {
-      if (searchCode && !tk.codigo_processo?.toLowerCase().includes(searchCode.toLowerCase())) {
-        return false;
+      if (searchCode) {
+        const termoBusca = searchCode.toLowerCase();
+        const matchProcesso = tk.codigo_processo?.toLowerCase().includes(termoBusca);
+        const eq = equipments.find(e => e.id === tk.equipment_id);
+        const matchPatrimonio = eq?.patrimonio?.toLowerCase().includes(termoBusca);
+
+        if (!matchProcesso && !matchPatrimonio) return false;
       }
 
       if (filter === 'Todos') return true;
@@ -39,16 +46,37 @@ export default function TicketTable({ tickets, equipments, usersList, filter, on
       return tk.status_chamado === filter;
     });
 
-  // 🌟 2. Lógica de Paginação (Fatia a lista filtrada para exibir apenas 10 por página)
   const totalItems = filteredTickets.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-  
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentTickets = filteredTickets.slice(indexOfFirstItem, indexOfLastItem);
 
+  // 🌟 FUNÇÕES PARA SINCRONIZAR AS BARRAS DE ROLAGEM
+  useEffect(() => {
+    if (tableScrollRef.current) {
+      setTableWidth(tableScrollRef.current.scrollWidth);
+    }
+  }, [currentTickets, expandedTickets]);
+
+  const handleTopScroll = () => {
+    if (tableScrollRef.current && topScrollRef.current) {
+      if (tableScrollRef.current.scrollLeft !== topScrollRef.current.scrollLeft) {
+        tableScrollRef.current.scrollLeft = topScrollRef.current.scrollLeft;
+      }
+    }
+  };
+
+  const handleTableScroll = () => {
+    if (topScrollRef.current && tableScrollRef.current) {
+      if (topScrollRef.current.scrollLeft !== tableScrollRef.current.scrollLeft) {
+        topScrollRef.current.scrollLeft = tableScrollRef.current.scrollLeft;
+      }
+    }
+  };
+
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mt-8 animate-in fade-in duration-200">
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mt-8 animate-in fade-in duration-200 flex flex-col">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 border-b pb-4 gap-4">
         <h2 className="text-lg font-bold text-slate-800 flex flex-wrap items-center gap-2">
           Gestão de Chamados 
@@ -59,10 +87,10 @@ export default function TicketTable({ tickets, equipments, usersList, filter, on
           )}
         </h2>
         
-        <div className="relative w-full sm:w-64">
+        <div className="relative w-full sm:w-72">
           <input 
             type="text" 
-            placeholder="Buscar por Nº do Processo..."
+            placeholder="Buscar Processo ou Patrimônio..." 
             className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition"
             value={searchCode}
             onChange={(e) => setSearchCode(e.target.value)}
@@ -71,17 +99,31 @@ export default function TicketTable({ tickets, equipments, usersList, filter, on
         </div>
       </div>
       
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-slate-600">
+      {/* 🌟 BARRA DE ROLAGEM SUPERIOR (Sincronizada) */}
+      <div 
+        ref={topScrollRef} 
+        onScroll={handleTopScroll}
+        className="overflow-x-auto overflow-y-hidden h-3 w-full mb-2 custom-scrollbar"
+      >
+        <div style={{ width: `${tableWidth}px`, height: '1px' }}></div>
+      </div>
+
+      {/* 🌟 TABELA ORIGINAL (Com ref e min-width garantido) */}
+      <div 
+        ref={tableScrollRef}
+        onScroll={handleTableScroll}
+        className="overflow-x-auto custom-scrollbar"
+      >
+        <table className="w-full text-left text-slate-600 min-w-[1000px]">
           <thead className="bg-slate-50 text-slate-700 font-medium border-b text-sm uppercase tracking-wider">
             <tr>
-              <th className="py-3 px-4 text-center">Nº Processo</th> 
-              <th className="py-3 px-4">Abertura</th>
-              <th className="py-3 px-4">Solicitante</th>
-              <th className="py-3 px-4">Patrimônio</th>
-              <th className="py-3 px-4 w-1/3">Problema & Solução</th>
-              <th className="py-3 px-4 text-center">Responsável (TI)</th>
-              <th className="py-3 px-4 text-center">Status</th>
+              <th className="py-3 px-4 text-center whitespace-nowrap">Nº Processo</th> 
+              <th className="py-3 px-4 whitespace-nowrap">Abertura</th>
+              <th className="py-3 px-4 whitespace-nowrap">Solicitante</th>
+              <th className="py-3 px-4 whitespace-nowrap">Patrimônio</th>
+              <th className="py-3 px-4 w-[400px]">Problema & Solução</th>
+              <th className="py-3 px-4 text-center whitespace-nowrap">Responsável (TI)</th>
+              <th className="py-3 px-4 text-center whitespace-nowrap">Status</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -98,7 +140,6 @@ export default function TicketTable({ tickets, equipments, usersList, filter, on
                   onAssignTechnician={onAssignTechnician}
                   onUpdateStatus={onUpdateStatus}
                   onDevolverClick={onDevolverClick}
-                  // Corrigido para as novas regras de paginação dinâmica
                   isLast={index >= currentTickets.length - 4} 
                   isLastTech={index >= currentTickets.length - 1}
                 />
@@ -106,7 +147,7 @@ export default function TicketTable({ tickets, equipments, usersList, filter, on
             ) : (
               <tr>
                 <td colSpan="7" className="py-8 text-center text-slate-500">
-                  Nenhum chamado encontrado com esses filtros.
+                  Nenhum chamado encontrado com esses filtros ou termos de busca.
                 </td>
               </tr>
             )}
@@ -114,7 +155,6 @@ export default function TicketTable({ tickets, equipments, usersList, filter, on
         </table>
       </div>
 
-      {/* 🌟 CONTROLES DE PAGINAÇÃO NO RODAPÉ */}
       {totalPages > 1 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 mt-4 border-t border-slate-100 text-sm text-slate-500">
           <div>

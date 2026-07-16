@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { History, ChevronLeft, ChevronRight, Wrench } from 'lucide-react';
 
 export default function TechHistoryTable({ historicoRecente, equipments }) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // 🌟 BLINDAGEM 1: Garante que historicoRecente seja sempre um array, mesmo se vier undefined da API
+  const topScrollRef = useRef(null);
+  const tableScrollRef = useRef(null);
+  const [tableWidth, setTableWidth] = useState(1000);
+
   const chamadosSeguros = historicoRecente || [];
   const equipamentosSeguros = equipments || [];
 
@@ -15,8 +18,30 @@ export default function TechHistoryTable({ historicoRecente, equipments }) {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentTickets = chamadosSeguros.slice(indexOfFirstItem, indexOfLastItem);
 
+  useEffect(() => {
+    if (tableScrollRef.current) {
+      setTableWidth(tableScrollRef.current.scrollWidth);
+    }
+  }, [currentTickets]);
+
+  const handleTopScroll = () => {
+    if (tableScrollRef.current && topScrollRef.current) {
+      if (tableScrollRef.current.scrollLeft !== topScrollRef.current.scrollLeft) {
+        tableScrollRef.current.scrollLeft = topScrollRef.current.scrollLeft;
+      }
+    }
+  };
+
+  const handleTableScroll = () => {
+    if (topScrollRef.current && tableScrollRef.current) {
+      if (topScrollRef.current.scrollLeft !== tableScrollRef.current.scrollLeft) {
+        topScrollRef.current.scrollLeft = tableScrollRef.current.scrollLeft;
+      }
+    }
+  };
+
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden animate-in fade-in duration-200 delay-200">
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden animate-in fade-in duration-200 delay-200 flex flex-col">
       <div className="bg-slate-50 px-6 py-4 border-b flex items-center gap-3">
         <div className="bg-slate-600 p-2 rounded-lg"><History className="w-5 h-5 text-white" /></div>
         <div>
@@ -25,16 +50,30 @@ export default function TechHistoryTable({ historicoRecente, equipments }) {
         </div>
       </div>
       
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-slate-600">
+      {/* 🌟 BARRA DE ROLAGEM SUPERIOR */}
+      <div 
+        ref={topScrollRef} 
+        onScroll={handleTopScroll}
+        className="overflow-x-auto overflow-y-hidden h-3 w-full mb-2 mt-2 custom-scrollbar"
+      >
+        <div style={{ width: `${tableWidth}px`, height: '1px' }}></div>
+      </div>
+
+      {/* 🌟 TABELA */}
+      <div 
+        ref={tableScrollRef}
+        onScroll={handleTableScroll}
+        className="overflow-x-auto custom-scrollbar pb-2"
+      >
+        <table className="w-full text-left text-slate-600 min-w-[1000px]">
           <thead className="bg-slate-50 text-slate-700 font-medium border-b text-sm uppercase tracking-wider">
             <tr>
-              <th className="py-3 px-4 text-center">Nº Processo</th>
-              <th className="py-3 px-4">Datas</th>
-              <th className="py-3 px-4">Solicitante</th>
-              <th className="py-3 px-4">Equipamento</th>
-              <th className="py-3 px-4 w-[400px] max-w-[400px]">Problema & Resolução</th>
-              <th className="py-3 px-4 text-center">Status</th>
+              <th className="py-3 px-4 text-center whitespace-nowrap">Nº Processo</th>
+              <th className="py-3 px-4 whitespace-nowrap">Datas</th>
+              <th className="py-3 px-4 whitespace-nowrap">Solicitante</th>
+              <th className="py-3 px-4 whitespace-nowrap">Equipamento</th>
+              <th className="py-3 px-4 w-[400px]">Problema & Resolução</th>
+              <th className="py-3 px-4 text-center whitespace-nowrap">Status</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -42,7 +81,6 @@ export default function TechHistoryTable({ historicoRecente, equipments }) {
               <tr><td colSpan="6" className="py-8 text-center text-slate-400 italic text-sm">Nenhum chamado finalizado recentemente.</td></tr>
             ) : (
               currentTickets.map((tk) => {
-                // 🌟 BLINDAGEM 2: Busca no array seguro
                 const eq = equipamentosSeguros.find(e => e.id === tk?.equipment_id);
                 const dataFechamento = tk?.finished_at || tk?.updatedAt || null;
                 const dataAbertura = tk?.createdAt || tk?.data_abertura;
@@ -56,7 +94,6 @@ export default function TechHistoryTable({ historicoRecente, equipments }) {
 
                 return (
                   <tr key={tk?.id} className="hover:bg-slate-50 transition align-top">
-                    
                     <td className="py-4 px-4 pt-5 align-top text-center">
                       <span className={`inline-block px-2.5 py-1 text-xs font-bold rounded border ${tk?.codigo_processo ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-slate-100 text-slate-400 border-slate-200 font-medium'}`}>
                         {tk?.codigo_processo || 'Antigo / N/A'}
@@ -93,13 +130,11 @@ export default function TechHistoryTable({ historicoRecente, equipments }) {
                     <td className="py-4 px-4 pt-5 text-sm leading-relaxed text-slate-500 w-[400px] max-w-[400px] whitespace-normal">
                       <p className="text-slate-600 break-words">{tk?.descricao_problema || 'Problema não informado.'}</p>
                       
-                      {/* 🌟 A MÁGICA AQUI: O max-w-[400px] trava a largura para ficar idêntica à do Admin */}
-                      <div className="mt-3 p-3 border border-slate-200 border-l-4 border-l-emerald-500 rounded-r-lg bg-slate-50 shadow-xs max-w-[400px]">
+                      <div className="mt-3 p-3 border border-slate-200 border-l-4 border-l-emerald-500 rounded-r-lg bg-slate-50 shadow-xs w-full min-w-[320px] max-w-[400px]">
                         <strong className="flex items-center gap-1.5 mb-1 font-bold text-xs uppercase tracking-wider text-emerald-700">
                           <Wrench className="w-3.5 h-3.5" /> Resolução Aplicada:
                         </strong>
                         
-                        {/* 🌟 Adicionado o leading-relaxed para a altura da linha ficar suave */}
                         <p className="font-medium text-slate-700 leading-relaxed bg-white/80 p-2 rounded border border-slate-100 mt-1 break-words whitespace-pre-wrap">
                           {resolucaoFormatada || 'Nenhuma resolução descrita.'}
                         </p>

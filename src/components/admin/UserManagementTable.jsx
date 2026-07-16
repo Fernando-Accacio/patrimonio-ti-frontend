@@ -1,23 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { UserPlus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { UserPlus, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import UserManagementTableRow from './UserManagementTableRow';
 
 export default function UserManagementTable({ users, currentUser, onUpdateRole, onDelete, onAddClick }) {
   const [currentPage, setCurrentPage] = useState(1);
-  const [roleFilter, setRoleFilter] = useState('Todos'); // 🌟 ESTADO DO FILTRO
+  const [roleFilter, setRoleFilter] = useState('Todos');
+  const [searchName, setSearchName] = useState(''); // 🌟 NOVO: Estado da busca
   const itemsPerPage = 10;
 
-  // 🌟 Se o usuário mudar o filtro, volta para a primeira página
   useEffect(() => {
     setCurrentPage(1);
-  }, [roleFilter]);
+  }, [roleFilter, searchName]); // Reset da página ao digitar
 
   const safeUsers = users || [];
 
-  // 🌟 APLICAÇÃO DO FILTRO ANTES DA PAGINAÇÃO
+  // 🌟 APLICAÇÃO DO FILTRO DE CARGO + BUSCA POR NOME/EMAIL
   const filteredUsers = safeUsers.filter(u => {
-    if (roleFilter === 'Todos') return true;
-    return u.role === roleFilter;
+    // 1. Filtra por nível de acesso
+    if (roleFilter !== 'Todos' && u.role !== roleFilter) return false;
+    
+    // 2. Filtra pelo que foi digitado na barra de pesquisa
+    if (searchName.trim() !== '') {
+      const termo = searchName.toLowerCase();
+      const nomeBate = u.nome?.toLowerCase().includes(termo);
+      const emailBate = u.email?.toLowerCase().includes(termo);
+      
+      if (!nomeBate && !emailBate) return false;
+    }
+    
+    return true;
   });
 
   const totalItems = filteredUsers.length;
@@ -29,14 +40,26 @@ export default function UserManagementTable({ users, currentUser, onUpdateRole, 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden animate-in fade-in duration-200">
       
-      <div className="bg-slate-50 px-6 py-4 border-b flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="bg-slate-50 px-6 py-4 border-b flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           <h2 className="text-lg font-bold text-slate-800">Controle de Acesso</h2>
           <p className="text-sm text-slate-500">Gerencie os níveis de permissão dos servidores do sistema.</p>
         </div>
         
-        {/* 🌟 CONTAINER DO FILTRO + BOTÃO DE NOVO */}
+        {/* 🌟 BARRA DE BUSCA + FILTRO + BOTÃO DE NOVO */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          
+          <div className="relative w-full sm:w-56 shrink-0">
+            <input 
+              type="text" 
+              placeholder="Buscar por nome ou e-mail..."
+              className="w-full pl-8 pr-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              value={searchName}
+              onChange={(e) => setSearchName(e.target.value)}
+            />
+            <Search className="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" />
+          </div>
+
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
@@ -69,7 +92,7 @@ export default function UserManagementTable({ users, currentUser, onUpdateRole, 
           </thead>
           <tbody className="divide-y divide-slate-100">
             {currentUsers.length === 0 ? (
-              <tr><td colSpan="4" className="py-8 text-center text-slate-400 italic text-sm">Nenhum servidor encontrado com este filtro.</td></tr>
+              <tr><td colSpan="4" className="py-8 text-center text-slate-400 italic text-sm">Nenhum servidor encontrado com estes filtros.</td></tr>
             ) : (
               currentUsers.map((u) => (
                 <UserManagementTableRow 

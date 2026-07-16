@@ -18,7 +18,6 @@ export default function TicketTableRow({
 
   const [avisoFechado, setAvisoFechado] = useState(false);
 
-  // Monitora alterações para resetar o dismiss do aviso caso novas mensagens cheguem
   useEffect(() => {
     if (ticket?.id) {
       const visualizado = localStorage.getItem(`alerta_visto_${ticket.id}`);
@@ -30,7 +29,6 @@ export default function TicketTableRow({
     }
   }, [ticket?.id, ticket?.resolucao_ti]);
 
-  // Formatação do histórico para a tela do Admin
   let resolucaoFormatada = (ticket?.resolucao_ti || '').toString();
   resolucaoFormatada = resolucaoFormatada.replace(/\[CONFIRMAÇÃO DO USUÁRIO\]:\s*(.+)/gi, 'Resposta do Usuário: "$1"');
   resolucaoFormatada = resolucaoFormatada.replace(/\[RECUSADO PELO USUÁRIO\]:\s*(.+)/gi, 'Recusa do Usuário: "$1"');
@@ -38,14 +36,19 @@ export default function TicketTableRow({
   resolucaoFormatada = resolucaoFormatada.replace(/\[SISTEMA\]:\s*(.+)/gi, 'Sistema: "$1"');
   resolucaoFormatada = resolucaoFormatada.replace(/\[OBSERVAÇÃO DO SUPORTE\]:\s*(.+)/gi, 'Observação do Suporte: "$1"');
 
-  // 🌟 REGRA À PROVA DE FALHAS: Isola a última tag inserida na string
   const textoResolucao = (ticket?.resolucao_ti || '').toString().trim();
-  const tagsEncontradas = [...textoResolucao.matchAll(/\[(OBSERVAÇÃO DO SUPORTE|CONFIRMAÇÃO DO USUÁRIO)\]/g)];
+  const tagsEncontradas = [...textoResolucao.matchAll(/\[(OBSERVAÇÃO DO SUPORTE|CONFIRMAÇÃO DO USUÁRIO|RECUSADO PELO USUÁRIO)\]/g)];
   
   let respondidoPeloCliente = false;
+  let tipoAviso = 'Chamado Retornado / Editado'; 
+
   if (tagsEncontradas.length > 0) {
     const ultimaTag = tagsEncontradas[tagsEncontradas.length - 1][1];
-    respondidoPeloCliente = ultimaTag === 'CONFIRMAÇÃO DO USUÁRIO';
+    respondidoPeloCliente = ultimaTag === 'CONFIRMAÇÃO DO USUÁRIO' || ultimaTag === 'RECUSADO PELO USUÁRIO';
+    
+    if (ultimaTag === 'RECUSADO PELO USUÁRIO') {
+      tipoAviso = 'Solução Recusada pelo Usuário';
+    }
   }
 
   const chamadoRetornado = respondidoPeloCliente && ['Aberto', 'Em Andamento'].includes(ticket?.status_chamado) && !avisoFechado;
@@ -98,7 +101,7 @@ export default function TicketTableRow({
           <div className="mb-2 inline-flex items-center gap-2 px-2.5 py-1 bg-orange-100 border border-orange-200 text-orange-700 text-[11px] font-bold rounded-md uppercase tracking-wider animate-pulse">
             <div className="flex items-center gap-1.5">
               <AlertCircle className="w-3.5 h-3.5" />
-              <span>Atenção: Chamado Retornado / Editado</span>
+              <span>Atenção: {tipoAviso}</span>
             </div>
             <button 
               onClick={handleFecharAviso}
@@ -120,7 +123,7 @@ export default function TicketTableRow({
         )}
 
         {resolucaoFormatada.trim() && (
-          <div className={`mt-3 p-3 border border-slate-200 border-l-4 rounded-r-lg text-sm shadow-xs bg-slate-50 ${ticket?.status_chamado === 'Cancelado' ? 'border-l-slate-400' : 'border-l-emerald-500'}`}>
+          <div className={`mt-3 p-3 border border-slate-200 border-l-4 rounded-r-lg text-sm shadow-xs bg-slate-50 w-full min-w-[320px] max-w-[400px] ${ticket?.status_chamado === 'Cancelado' ? 'border-l-slate-400' : 'border-l-emerald-500'}`}>
             <strong className={`flex items-center gap-1.5 mb-1 font-bold text-xs uppercase tracking-wider ${ticket?.status_chamado === 'Cancelado' ? 'text-slate-500' : 'text-emerald-700'}`}>
               {ticket?.status_chamado === 'Cancelado' ? <><Info className="w-3.5 h-3.5" /> Motivo do Cancelamento:</> : <><Wrench className="w-3.5 h-3.5" /> Histórico de Diálogo:</>}
             </strong>
@@ -128,8 +131,14 @@ export default function TicketTableRow({
               {resolucaoFormatada}
             </p>   
             {ticket?.status_chamado === 'Aguardando Confirmação' && ticket?.finalizador?.nome && (
-              <p className="mt-2 text-[12px] font-semibold text-purple-700 bg-purple-50 border border-purple-100 rounded px-2 py-2">
+              <p className="mt-2 text-[12px] font-semibold text-purple-700 bg-purple-50 border border-purple-100 rounded px-2 py-2 leading-snug">
                 Aguardando confirmação do usuário. Atendimento enviado por {ticket.finalizador.nome}.
+              </p>
+            )}
+            {/* 🌟 AQUI: ADICIONANDO A CONFIRMAÇÃO DO USUÁRIO NO ADMIN */}
+            {ticket?.status_chamado === 'Concluído' && ticket?.confirmador?.nome && (
+              <p className="mt-2 text-[12px] font-semibold text-green-700 bg-green-50 border border-green-100 rounded px-2 py-2 leading-snug">
+                Confirmado pelo usuário: {ticket.confirmador.nome}.
               </p>
             )}
           </div>

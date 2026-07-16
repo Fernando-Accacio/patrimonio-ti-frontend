@@ -15,17 +15,12 @@ export default function MyTicketsTableRow({
 
   let resolucaoVisivel = (ticket.resolucao_ti || '').toString();
 
-  resolucaoVisivel = resolucaoVisivel
-    ?.replace(/\n\s*\n\[(?:CONFIRMADO PELO USUÁRIO|CONFIRMAÇÃO DO USUÁRIO)\]:[\s\S]*$/i, '')
-    .trim() || '';
-
   resolucaoVisivel = resolucaoVisivel.replace(/\[CANCELADO PELO USUÁRIO\]:\s*/gi, '');
-
-  // 🌟 ATUALIZADO: Substituição exata idêntica ao painel do Admin
   resolucaoVisivel = resolucaoVisivel.replace(/\[CONFIRMAÇÃO DO USUÁRIO\]:\s*(.+)/gi, 'Resposta do Usuário: "$1"');
   resolucaoVisivel = resolucaoVisivel.replace(/\[RECUSADO PELO USUÁRIO\]:\s*(.+)/gi, 'Recusa do Usuário: "$1"');
   resolucaoVisivel = resolucaoVisivel.replace(/\[SISTEMA\]:\s*(.+)/gi, 'Sistema: "$1"');
   resolucaoVisivel = resolucaoVisivel.replace(/\[OBSERVAÇÃO DO SUPORTE\]:\s*(.+)/gi, 'Observação do Suporte: "$1"');
+  resolucaoVisivel = resolucaoVisivel.trim();
 
   const handleResponder = (aprovado) => {
     if (!aprovado && !comentario.trim()) {
@@ -40,7 +35,6 @@ export default function MyTicketsTableRow({
     e.preventDefault();
     if (!comentarioDevolucao.trim()) return;
     
-    // Payload completo casado com as exigências de Schema do Fastify
     onEditClick(ticket.id, {
       descricao_problema: ticket.descricao_problema,
       patrimonio: matchedEq ? matchedEq.patrimonio : '',
@@ -51,6 +45,22 @@ export default function MyTicketsTableRow({
     setComentarioDevolucao('');
   };
 
+  // Enviar a dúvida de suporte ao dar Enter na barra pequena de input
+  const handleKeyDownSuporte = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleEnviarRespostaSuporte(e);
+    }
+  };
+
+  // Enviar confirmação positiva ao dar Enter na caixa de fechamento do chamado
+  const handleKeyDownConfirmacao = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleResponder(true); // Confirma a solução nativamente por padrão ao dar Enter
+    }
+  };
+
   const textoOriginal = (ticket.resolucao_ti || '').toString();
   const indexSuporte = textoOriginal.lastIndexOf('[OBSERVAÇÃO DO SUPORTE]');
   const indexUsuario = textoOriginal.lastIndexOf('[CONFIRMAÇÃO DO USUÁRIO]');
@@ -59,7 +69,6 @@ export default function MyTicketsTableRow({
 
   return (
     <tr className={`border-b align-top transition ${ticket.status_chamado === 'Cancelado' ? 'bg-slate-50/50 opacity-70' : 'hover:bg-slate-50'}`}>
-      
       <td className="py-3 px-3 align-top text-center pt-4">
         <span className={`inline-block px-2.5 py-1 text-xs font-bold rounded border ${ticket.codigo_processo ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-slate-100 text-slate-400 border-slate-200 font-medium'}`}>
           {ticket.codigo_processo || 'Antigo / N/A'}
@@ -96,7 +105,7 @@ export default function MyTicketsTableRow({
           </button>
         )}
         
-        {/* Caixinha com a Borda Verde-Esmeralda unificada */}
+        {/* Histórico */}
         {(ticket.resolucao_ti || '').toString().trim() && (
           <div className="mt-3 p-3 border border-slate-200 border-l-4 rounded-r-lg text-sm shadow-xs bg-slate-50 w-full min-w-[320px] max-w-[400px] border-l-emerald-500">
             <strong className="flex items-center gap-1.5 mb-1 font-bold text-xs uppercase tracking-wider text-emerald-700">
@@ -106,7 +115,6 @@ export default function MyTicketsTableRow({
               {resolucaoVisivel}
             </div>
             
-            {/* Campo de resposta rápida: some após o submit por conta do cálculo de indexes */}
             {temObservacaoPendente && (
               <form onSubmit={handleEnviarRespostaSuporte} className="mt-3 pt-3 border-t border-slate-200/60 flex flex-col gap-2">
                 <span className="text-[11px] font-bold text-amber-700 uppercase">Responder Dúvida do Suporte:</span>
@@ -117,6 +125,7 @@ export default function MyTicketsTableRow({
                     className="text-xs p-1.5 border rounded border-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white flex-1"
                     value={comentarioDevolucao}
                     onChange={(e) => setComentarioDevolucao(e.target.value)}
+                    onKeyDown={handleKeyDownSuporte} // 🌟 Envia no Enter nativo do input
                   />
                   <button type="submit" className="bg-amber-600 hover:bg-amber-700 text-white rounded p-1.5 flex items-center justify-center transition cursor-pointer">
                     <Send className="w-3.5 h-3.5" />
@@ -204,12 +213,13 @@ export default function MyTicketsTableRow({
                 setComentario(e.target.value);
                 if (erroConfirmacao) setErroConfirmacao('');
               }}
+              onKeyDown={handleKeyDownConfirmacao} // 🌟 Ao apertar Enter, confirma a solução
             />
             <div className="flex gap-1">
-              <button type="button" onClick={() => handleResponder(true)} className="bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-2 rounded text-[10px] flex-1">
+              <button type="button" onClick={() => handleResponder(true)} className="bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-2 rounded text-[10px] flex-1 cursor-pointer">
                 Confirmar solução
               </button>
-              <button type="button" onClick={() => handleResponder(false)} className="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-[10px] flex-1">
+              <button type="button" onClick={() => handleResponder(false)} className="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-[10px] flex-1 cursor-pointer">
                 Não foi concluído
               </button>
             </div>

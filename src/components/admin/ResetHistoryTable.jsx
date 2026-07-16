@@ -1,22 +1,49 @@
-import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 
 export default function ResetHistoryTable({ history }) {
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchName, setSearchName] = useState(''); // 🌟 NOVO: Estado da busca
   const itemsPerPage = 10;
 
   const safeHistory = history || [];
-  const totalItems = safeHistory.length;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchName]);
+
+  // 🌟 APLICAÇÃO DO FILTRO DE BUSCA POR NOME
+  const filteredHistory = safeHistory.filter(hist => {
+    if (!searchName.trim()) return true;
+    return hist.nome?.toLowerCase().includes(searchName.toLowerCase());
+  });
+
+  const totalItems = filteredHistory.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentHistory = safeHistory.slice(indexOfFirstItem, indexOfLastItem);
+  const currentHistory = filteredHistory.slice(indexOfFirstItem, indexOfLastItem);
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden animate-in fade-in duration-200">
-      <div className="bg-slate-50 px-6 py-4 border-b">
-        <h2 className="text-base font-bold text-slate-800">Histórico de Ações</h2>
-        <p className="text-xs text-slate-500">Registro de auditoria global com todas as redefinições de acesso processadas pelo TI.</p>
+      
+      <div className="bg-slate-50 px-6 py-4 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-base font-bold text-slate-800">Histórico de Ações</h2>
+          <p className="text-xs text-slate-500">Registro de auditoria global com todas as redefinições de acesso processadas pelo TI.</p>
+        </div>
+        
+        {/* 🌟 BARRA DE BUSCA */}
+        <div className="relative w-full sm:w-64">
+          <input 
+            type="text" 
+            placeholder="Buscar por nome do servidor..."
+            className="w-full pl-8 pr-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            value={searchName}
+            onChange={(e) => setSearchName(e.target.value)}
+          />
+          <Search className="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" />
+        </div>
       </div>
       
       <div className="overflow-x-auto">
@@ -33,7 +60,7 @@ export default function ResetHistoryTable({ history }) {
             {currentHistory.length === 0 ? (
               <tr>
                 <td colSpan="4" className="py-6 text-center text-slate-400 italic text-xs">
-                  Nenhum histórico de redefinição registrado no sistema.
+                  {searchName ? 'Nenhum histórico encontrado com esse nome.' : 'Nenhum histórico de redefinição registrado no sistema.'}
                 </td>
               </tr>
             ) : (
@@ -43,7 +70,6 @@ export default function ResetHistoryTable({ history }) {
                   <td className="py-3 px-6 font-mono text-xs">{hist.email}</td>
                   <td className="py-3 px-6 text-xs">{new Date(hist.dataProcessamento).toLocaleString('pt-BR')}</td>
                   <td className="py-3 px-6 text-center">
-                    {/* 🌟 AQUI: padding aumentado e texto um pouco maior */}
                     <span className={`inline-block px-3 py-1 rounded-full text-[11px] font-bold ${
                       hist.status === 'Aprovado' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                     }`}>

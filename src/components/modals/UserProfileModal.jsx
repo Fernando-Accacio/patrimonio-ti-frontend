@@ -64,7 +64,7 @@ export default function UserProfileModal({ show, onClose, user, onSuccess }) {
           <button type="button" onClick={() => { setActiveTab('senha'); setErro(''); }} className={`flex-1 py-3 flex items-center justify-center gap-2 cursor-pointer transition ${activeTab === 'senha' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}>
             <KeyRound className="w-4 h-4" /> Segurança
           </button>
-        </div>
+        </div>  
 
         <form onSubmit={handleSalvar} className="p-6 space-y-4">
           {erro && <div className="p-3 bg-red-100 text-red-700 text-sm rounded font-medium">{erro}</div>}
@@ -83,6 +83,10 @@ export default function UserProfileModal({ show, onClose, user, onSuccess }) {
               <div>
                 <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">E-mail Institucional</label>
                 <input type="email" readOnly className="w-full px-3 py-2 border rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed outline-none text-sm" value={user?.email || ''} />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Matrícula Funcional</label>
+                <input type="text" readOnly className="w-full px-3 py-2 border rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed outline-none text-sm" value={user?.matricula || ''} />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Ramal Interno</label>

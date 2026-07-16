@@ -7,7 +7,8 @@ export function useAuthForm() {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-  const [ramal, setRamal] = useState(''); // 🌟 ADICIONADO: Estado do ramal
+  const [ramal, setRamal] = useState('');
+  const [matricula, setMatricula] = useState(''); // 🌟 Já estava aqui, excelente!
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -20,9 +21,9 @@ export function useAuthForm() {
     if (resData) {
       if (resData.error === 'Bad Request') return 'Verifique se os dados estão corretos e não há campos vazios.';
       
-      // 🌟 CORREÇÃO: Agora ele prioriza a propriedade "message", que é onde o seu UserService
-      // joga a string "E-mail já cadastrado." pelo `throw new Error(...)`
-      return resData.message || resData.error || 'Erro ao conectar com o servidor.';
+      // 🌟 CORREÇÃO DE RETORNO: O seu Express envia a mensagem de erro em 'error' 
+      // (ex: res.status(400).send({ error: e.message })), então priorizamos 'error' e depois 'message'
+      return resData.error || resData.message || 'Erro ao conectar com o servidor.';
     }
     return 'Erro de conexão. Verifique se o servidor está rodando.';
   };
@@ -68,14 +69,24 @@ export function useAuthForm() {
       return;
     }
 
+    if (!matricula.trim()) {
+      setErro('A matrícula funcional é obrigatória para solicitar o acesso.');
+      return;
+    }
+
     if (!ramal.trim()) {
       setErro('O número do ramal é obrigatório para solicitar o acesso.');
       return;
     }
 
     try {
-      // 🌟 ATUALIZADO: Enviando nome, email estruturado e ramal obrigatório
-      await api.post('/register', { nome, email: emailTrimmed, ramal, role: 'USER' });
+      await api.post('/register', { 
+        nome, 
+        email: emailTrimmed, 
+        matricula, 
+        ramal, 
+        role: 'USER' 
+      });
       setSucesso(true);
       setTimeout(() => navigate('/'), 10000);
     } catch (error) {
@@ -84,7 +95,11 @@ export function useAuthForm() {
   };
 
   return {
-    nome, setNome, email, setEmail, senha, setSenha, ramal, setRamal, // 🌟 EXPORTADO: ramal e setRamal
+    nome, setNome, 
+    email, setEmail, 
+    senha, setSenha, 
+    ramal, setRamal,
+    matricula, setMatricula,
     erro, sucesso, showPassword, setShowPassword,
     handleLogin, handleRegister, navigate
   };

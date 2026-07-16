@@ -7,7 +7,6 @@ export default function ModalDevolucao({ show, onClose, onSubmit, ticket, equipm
 
   useEffect(() => {
     if (ticket) {
-      // Procura o patrimônio atual para já vir preenchido no campo de texto
       const eq = equipments.find(e => e.id === ticket.equipment_id);
       setPatrimonio(eq ? eq.patrimonio : '');
       setObservacao('');
@@ -18,24 +17,27 @@ export default function ModalDevolucao({ show, onClose, onSubmit, ticket, equipm
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Envia o patrimônio como string solta e a observação
     onSubmit(ticket.id, { observacao, patrimonio });
   };
 
   const isDevolucao = observacao.trim().length > 0;
 
+  // Função para lidar com a tecla Enter no textarea
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      e.currentTarget.form?.requestSubmit(); // Submete o formulário nativamente
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      
-      {/* 🌟 O FUNDO: Separado e leve para não travar a animação do navegador */}
       <div 
         className="absolute inset-0 bg-slate-900/50 transition-opacity" 
         onClick={onClose}
       ></div>
 
-      {/* 🌟 O MODAL: Anima sozinho por cima do fundo */}
       <div className="relative z-10 bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-amber-50">
           <div className="flex items-center gap-2 text-amber-700">
             <AlertCircle className="w-5 h-5" />
@@ -47,7 +49,6 @@ export default function ModalDevolucao({ show, onClose, onSubmit, ticket, equipm
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
-          
           <div>
             <label className="block text-sm font-bold text-slate-700 mb-1">Patrimônio Informado</label>
             <p className="text-xs text-slate-500 mb-2">Edite livremente se o usuário tiver digitado errado.</p>
@@ -68,6 +69,7 @@ export default function ModalDevolucao({ show, onClose, onSubmit, ticket, equipm
             <textarea
               value={observacao}
               onChange={(e) => setObservacao(e.target.value)}
+              onKeyDown={handleKeyDown} // 🌟 Captura o Enter aqui
               placeholder='Ex: "O número do patrimônio correto é este mesmo?"'
               className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-amber-500 resize-none h-24"
             />
@@ -77,7 +79,6 @@ export default function ModalDevolucao({ show, onClose, onSubmit, ticket, equipm
             <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition cursor-pointer">
               Cancelar
             </button>
-            
             <button 
               type="submit" 
               className={`px-4 py-2 text-sm font-bold text-white rounded-lg shadow-sm flex items-center gap-2 transition cursor-pointer ${
@@ -91,7 +92,6 @@ export default function ModalDevolucao({ show, onClose, onSubmit, ticket, equipm
               )}
             </button>
           </div>
-
         </form>
       </div>
     </div>
