@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Edit2, UserCircle, AlertTriangle, Wrench, Send } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Edit2, UserCircle, AlertTriangle, Wrench, Send, AlertCircle, X } from 'lucide-react';
 
 export default function MyTicketsTableRow({ 
   ticket, equipments, isExpanded, onToggleExpand, onEditClick, onCancelTicketClick, 
@@ -8,28 +8,60 @@ export default function MyTicketsTableRow({
   const [comentario, setComentario] = useState('');
   const [comentarioDevolucao, setComentarioDevolucao] = useState('');
   const [erroConfirmacao, setErroConfirmacao] = useState('');
+  
+  // 🌟 ESTADO DO ALERTA PISCANTE DO USUÁRIO
+  const [avisoFechado, setAvisoFechado] = useState(false);
+
   const matchedEq = equipments.find(e => e.id === ticket.equipment_id);
   const dataDoChamado = ticket.createdAt || ticket.data_abertura;
   const dataFechamento = ticket.finished_at || ticket.updatedAt || null;
   const nomeTecnico = ticket.tecnico?.nome || null;
 
-  let resolucaoVisivel = (ticket.resolucao_ti || '').toString();
+  // 🌟 CONTROLE DO ALERTA PISCANTE DO USUÁRIO (Baseado no localStorage)
+  useEffect(() => {
+    if (ticket?.id) {
+      const visualizado = localStorage.getItem(`alerta_usuario_visto_${ticket.id}`);
+      if (visualizado === 'true') {
+        setAvisoFechado(true);
+      } else {
+        setAvisoFechado(false);
+      }
+    }
+  }, [ticket?.id, ticket?.resolucao_ti]);
 
-  // Se o texto não começar com uma tag do sistema, significa que a primeira linha é a resposta direta do técnico.
-  // Vamos formatar para exibir "Resolução: "texto"" de forma amigável:
-  if (resolucaoVisivel.trim() && !resolucaoVisivel.trim().startsWith('[')) {
+  const handleFecharAviso = (e) => {
+    e.stopPropagation();
+    localStorage.setItem(`alerta_usuario_visto_${ticket.id}`, 'true');
+    setAvisoFechado(true);
+  };
+
+  // 🌟 SUA BASE DE FORMATAÇÃO REAJUSTADA COM O IF COMPLETO
+  let resolucaoVisivel = (ticket.resolucao_ti || '').toString().trim();
+
+  if (resolucaoVisivel && !resolucaoVisivel.startsWith('[')) {
     const linhas = resolucaoVisivel.split('\n');
     linhas[0] = `Resolução: "${linhas[0]}"`;
     resolucaoVisivel = linhas.join('\n');
   }
 
-  // Tratamento e limpeza das demais tags mantendo o histórico de diálogo intacto
-  resolucaoVisivel = resolucaoVisivel.replace(/\[CANCELADO PELO USUÁRIO\]:\s*/gi, '');
+  // Identifica as posições para saber qual foi a última interação real
+  const textoOriginal = (ticket.resolucao_ti || '').toString();
+  const indexSuporte = textoOriginal.lastIndexOf('[OBSERVAÇÃO DO SUPORTE]');
+  const indexUsuario = textoOriginal.lastIndexOf('[CONFIRMAÇÃO DO USUÁRIO]');
+  const indexRecusa = textoOriginal.lastIndexOf('[RECUSADO PELO USUÁRIO]');
+  const indexUltimoUsuario = Math.max(indexUsuario, indexRecusa);
+
+  // Pisca se a última interação gravada foi do suporte e o chamado está ativo na fila
+  const chamadoRetornadoParaUsuario = indexSuporte > -1 && indexSuporte > indexUltimoUsuario && ticket.status_chamado === 'Aberto' && !avisoFechado;
+
+  // Tratamento e limpeza das demais tags mantendo o histórico de diálogo corrido e intacto
+  resolucaoVisivel = resolucaoVisivel.replace(/\[CANCELADO PELO USUÁRIO\]:\s*/gi, 'Cancelado pelo Usuário: ');
   resolucaoVisivel = resolucaoVisivel.replace(/\[CONFIRMAÇÃO DO USUÁRIO\]:\s*(.+)/gi, 'Confirmação do Usuário: "$1"');
   resolucaoVisivel = resolucaoVisivel.replace(/\[CONFIRMADO PELO USUÁRIO\]:\s*(.+)/gi, 'Confirmação do Usuário: "$1"');
   resolucaoVisivel = resolucaoVisivel.replace(/\[RECUSADO PELO USUÁRIO\]:\s*(.+)/gi, 'Recusa do Usuário: "$1"');
   resolucaoVisivel = resolucaoVisivel.replace(/\[SISTEMA\]:\s*(.+)/gi, 'Sistema: "$1"');
   resolucaoVisivel = resolucaoVisivel.replace(/\[OBSERVAÇÃO DO SUPORTE\]:\s*(.+)/gi, 'Observação do Suporte: "$1"');
+  resolucaoVisivel = resolucaoVisivel.replace(/\[RESOLUÇÃO\]:\s*(.+)/gi, 'Resolução: "$1"');
   resolucaoVisivel = resolucaoVisivel.trim();
 
   const handleResponder = (aprovado) => {
@@ -69,11 +101,7 @@ export default function MyTicketsTableRow({
     }
   };
 
-  const textoOriginal = (ticket.resolucao_ti || '').toString();
-  const indexSuporte = textoOriginal.lastIndexOf('[OBSERVAÇÃO DO SUPORTE]');
-  const indexUsuario = textoOriginal.lastIndexOf('[CONFIRMAÇÃO DO USUÁRIO]');
-  
-  const temObservacaoPendente = indexSuporte > -1 && indexSuporte > indexUsuario && ticket.status_chamado === 'Aberto';
+  const temObservacaoPendente = indexSuporte > -1 && indexSuporte > indexUltimoUsuario && ticket.status_chamado === 'Aberto';
 
   return (
     <tr className={`border-b align-top transition ${ticket.status_chamado === 'Cancelado' ? 'bg-slate-50/50 opacity-70' : 'hover:bg-slate-50'}`}>
@@ -90,13 +118,11 @@ export default function MyTicketsTableRow({
         </div>
       </td>
       
-      {/* COLUNA EQUIPAMENTO (PATRIMÔNIO + TIPO EMBAIXO) */}
       <td className="py-3 px-3 text-center">
         <div className="flex flex-col items-center justify-center gap-1 whitespace-nowrap">
           <span className="font-bold text-slate-800 text-sm">
             {ticket.equipment?.patrimonio || `ID: ${ticket.equipment_id}`}
           </span>
-          {/* 🌟 MUDANÇA: O React agora lê a chave exata que o JSON mandou */}
           {ticket.equipment?.equipmentType?.nome ? (
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded shadow-sm">
               {ticket.equipment.equipmentType.nome}
@@ -109,9 +135,7 @@ export default function MyTicketsTableRow({
         </div>
       </td>
 
-      {/* 🌟 NOVA COLUNA: SETOR DO CHAMADO */}
       <td className="py-3 px-3 text-center">
-        {/* 🌟 MUDANÇA: Lê direto da chave 'sector' que vimos no JSON */}
         {ticket.equipment?.sector ? (
           <div className="flex flex-col items-center justify-center gap-0.5 whitespace-nowrap">
             <span className="text-xs font-bold text-slate-700">{ticket.equipment.sector.nome}</span>
@@ -138,11 +162,30 @@ export default function MyTicketsTableRow({
           )}
         </div>
         
-        {(ticket.resolucao_ti || '').toString().trim() && (
+        {resolucaoVisivel && (
           <div className="mt-3 p-3 border border-slate-200 border-l-4 rounded-r-lg text-sm shadow-xs bg-slate-50 w-full min-w-[320px] max-w-[400px] border-l-emerald-500">
+            
+            {/* 🌟 POPUP ALERTA PISCANTE IDENTICO AO DO ADMIN */}
+            {chamadoRetornadoParaUsuario && (
+              <div className="mb-2 inline-flex items-center gap-2 px-2.5 py-1 bg-orange-100 border border-orange-200 text-orange-700 text-[11px] font-bold rounded-md uppercase tracking-wider animate-pulse w-full justify-between">
+                <div className="flex items-center gap-1.5">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  <span>Atenção: TI solicitou informações</span>
+                </div>
+                <button 
+                  onClick={handleFecharAviso}
+                  className="p-0.5 hover:bg-orange-200 rounded text-orange-800 transition cursor-pointer"
+                  title="Dispensar alerta"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            )}
+
             <strong className="flex items-center gap-1.5 mb-1 font-bold text-xs uppercase tracking-wider text-emerald-700">
               <Wrench className="w-3.5 h-3.5" /> Histórico de Diálogo:
             </strong>
+            {/* Exibição corrida original intacta */}
             <div className="font-medium text-slate-700 leading-relaxed bg-white/80 p-2 rounded border border-slate-100 mt-1 break-words whitespace-pre-wrap">
               {resolucaoVisivel}
             </div>
@@ -185,7 +228,6 @@ export default function MyTicketsTableRow({
             }`}>
               <UserCircle className="w-3.5 h-3.5 text-amber-600" /> {nomeTecnico}
             </div>
-            {/* 🌟 PADRÃO: Tag de Ramal */}
             {ticket.tecnico?.ramal && (
               <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 mt-0.5">
                 Ramal: {ticket.tecnico.ramal}
@@ -239,7 +281,7 @@ export default function MyTicketsTableRow({
               </div>
             )}
             <textarea 
-              placeholder="Comentário opcional sobre a solução..." 
+              placeholder="Comentário opcional sobre a solution..." 
               className="text-xs p-2 border rounded border-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-400 w-full resize-none h-16"
               value={comentario}
               onChange={(e) => {
