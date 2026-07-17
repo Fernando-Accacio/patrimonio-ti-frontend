@@ -25,8 +25,8 @@ export default function MyTicketsTableRow({
 
   // Tratamento e limpeza das demais tags mantendo o histórico de diálogo intacto
   resolucaoVisivel = resolucaoVisivel.replace(/\[CANCELADO PELO USUÁRIO\]:\s*/gi, '');
-  resolucaoVisivel = resolucaoVisivel.replace(/\[CONFIRMAÇÃO DO USUÁRIO\]:\s*(.+)/gi, 'Resposta do Usuário: "$1"');
-  resolucaoVisivel = resolucaoVisivel.replace(/\[CONFIRMADO PELO USUÁRIO\]:\s*(.+)/gi, 'Resposta do Usuário: "$1"');
+  resolucaoVisivel = resolucaoVisivel.replace(/\[CONFIRMAÇÃO DO USUÁRIO\]:\s*(.+)/gi, 'Confirmação do Usuário: "$1"');
+  resolucaoVisivel = resolucaoVisivel.replace(/\[CONFIRMADO PELO USUÁRIO\]:\s*(.+)/gi, 'Confirmação do Usuário: "$1"');
   resolucaoVisivel = resolucaoVisivel.replace(/\[RECUSADO PELO USUÁRIO\]:\s*(.+)/gi, 'Recusa do Usuário: "$1"');
   resolucaoVisivel = resolucaoVisivel.replace(/\[SISTEMA\]:\s*(.+)/gi, 'Sistema: "$1"');
   resolucaoVisivel = resolucaoVisivel.replace(/\[OBSERVAÇÃO DO SUPORTE\]:\s*(.+)/gi, 'Observação do Suporte: "$1"');

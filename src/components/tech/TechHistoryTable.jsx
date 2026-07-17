@@ -114,17 +114,28 @@ export default function TechHistoryTable({ historicoRecente, equipments }) {
             ) : (
               currentTickets.map((tk) => {
                 const eq = equipamentosSeguros.find(e => e.id === tk?.equipment_id);
-                const dataFechamento = tk?.finished_at || tk?.updatedAt || null;
-                const dataAbertura = tk?.createdAt || tk?.data_abertura;
-                
-                let resolucaoFormatada = (tk?.resolucao_ti || '').toString();
-                resolucaoFormatada = resolucaoFormatada.replace(/\[(?:CONFIRMADO PELO USUÁRIO|CONFIRMAÇÃO DO USUÁRIO)\]:\s*(.+)/gi, 'Confirmação do Usuário: "$1"');
-                resolucaoFormatada = resolucaoFormatada.replace(/\[RECUSADO PELO USUÁRIO\]:\s*(.+)/gi, 'Recusa do Usuário: "$1"');
-                resolucaoFormatada = resolucaoFormatada.replace(/\[CANCELADO PELO USUÁRIO\]:\s*(.+)/gi, 'Cancelado pelo Usuário: "$1"');
-                resolucaoFormatada = resolucaoFormatada.replace(/\[SISTEMA\]:\s*(.+)/gi, 'Sistema: "$1"');
-                resolucaoFormatada = resolucaoFormatada.replace(/\[OBSERVAÇÃO DO SUPORTE\]:\s*(.+)/gi, 'Observação do Suporte: "$1"');
+const dataFechamento = tk?.finished_at || tk?.updatedAt || null;
+const dataAbertura = tk?.createdAt || tk?.data_abertura;
 
-                return (
+// 🌟 SUA BASE DE FORMATAÇÃO DO SUPORTE / ADMIN CORRIGIDA
+let resolucaoFormatada = (tk?.resolucao_ti || '').toString();
+
+// Se o texto não começar com uma tag do sistema, formata a primeira linha amigavelmente
+if (resolucaoFormatada.trim() && !resolucaoFormatada.trim().startsWith('[')) {
+  const linhas = resolucaoFormatada.split('\n');
+  linhas[0] = `Resolução: "${linhas[0]}"`;
+  resolucaoFormatada = linhas.join('\n');
+}
+
+        // Traduz as tags automáticas do sistema de forma unificada
+        resolucaoFormatada = resolucaoFormatada.replace(/\[(?:CONFIRMADO PELO USUÁRIO|CONFIRMAÇÃO DO USUÁRIO)\]:\s*(.+)/gi, 'Resposta do Usuário: "$1"');
+        resolucaoFormatada = resolucaoFormatada.replace(/\[RECUSADO PELO USUÁRIO\]:\s*(.+)/gi, 'Recusa do Usuário: "$1"');
+        resolucaoFormatada = resolucaoFormatada.replace(/\[CANCELADO PELO USUÁRIO\]:\s*(.+)/gi, 'Cancelado pelo Usuário: "$1"');
+        resolucaoFormatada = resolucaoFormatada.replace(/\[SISTEMA\]:\s*(.+)/gi, 'Sistema: "$1"');
+        resolucaoFormatada = resolucaoFormatada.replace(/\[OBSERVAÇÃO DO SUPORTE\]:\s*(.+)/gi, 'Observação do Suporte: "$1"');
+        resolucaoFormatada = resolucaoFormatada.replace(/\[RESOLUÇÃO\]:\s*(.+)/gi, 'Resolução: "$1"');
+
+        return (
                   <tr key={tk?.id} className="hover:bg-slate-50 transition align-top">
                     <td className="py-4 px-4 pt-5 align-top text-center">
                       <span className={`inline-block px-2.5 py-1 text-xs font-bold rounded border ${tk?.codigo_processo ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-slate-100 text-slate-400 border-slate-200 font-medium'}`}>

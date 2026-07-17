@@ -30,12 +30,20 @@ export default function TicketTableRow({
   }, [ticket?.id, ticket?.resolucao_ti]);
 
   let resolucaoFormatada = (ticket?.resolucao_ti || '').toString();
-  resolucaoFormatada = resolucaoFormatada.replace(/\[CONFIRMAÇÃO DO USUÁRIO\]:\s*(.+)/gi, 'Resposta do Usuário: "$1"');
+
+  // 🌟 1. Formata a resposta direta do técnico (primeira linha)
+  if (resolucaoFormatada.trim() && !resolucaoFormatada.trim().startsWith('[')) {
+    const linhas = resolucaoFormatada.split('\n');
+    linhas[0] = `Resolução: "${linhas[0]}"`;
+    resolucaoFormatada = linhas.join('\n');
+  }
+
+  // 🌟 2. Traduz as tags automáticas do sistema
+  resolucaoFormatada = resolucaoFormatada.replace(/\[(?:CONFIRMADO PELO USUÁRIO|CONFIRMAÇÃO DO USUÁRIO)\]:\s*(.+)/gi, 'Confirmação do Usuário: "$1"');
   resolucaoFormatada = resolucaoFormatada.replace(/\[RECUSADO PELO USUÁRIO\]:\s*(.+)/gi, 'Recusa do Usuário: "$1"');
   resolucaoFormatada = resolucaoFormatada.replace(/\[CANCELADO PELO USUÁRIO\]:\s*(.+)/gi, 'Cancelado pelo Usuário: "$1"');
   resolucaoFormatada = resolucaoFormatada.replace(/\[SISTEMA\]:\s*(.+)/gi, 'Sistema: "$1"');
   resolucaoFormatada = resolucaoFormatada.replace(/\[OBSERVAÇÃO DO SUPORTE\]:\s*(.+)/gi, 'Observação do Suporte: "$1"');
-
   const textoResolucao = (ticket?.resolucao_ti || '').toString().trim();
   const tagsEncontradas = [...textoResolucao.matchAll(/\[(OBSERVAÇÃO DO SUPORTE|CONFIRMAÇÃO DO USUÁRIO|RECUSADO PELO USUÁRIO)\]/g)];
   
