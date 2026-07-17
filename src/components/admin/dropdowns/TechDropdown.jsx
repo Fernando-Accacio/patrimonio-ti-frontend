@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { User } from 'lucide-react';
+import { User, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function TechDropdown({ ticketId, tecnicos, atualTecnico, isFinalizado, onAssignTechnician, isLast, isLastTech }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -57,7 +57,6 @@ export default function TechDropdown({ ticketId, tecnicos, atualTecnico, isFinal
   }
 
   return (
-    // 🌟 1. Aumentamos o z-index quando aberto para [9999] e removemos z-10 padrão para não bugar a tabela
     <div className={`relative w-full text-left ${isOpen ? 'z-[9999]' : ''}`}>
       <button
         ref={buttonRef}
@@ -73,13 +72,15 @@ export default function TechDropdown({ ticketId, tecnicos, atualTecnico, isFinal
         }`}
       >
         <span>{atualTecnico ? atualTecnico.nome : 'Aguardando...'}</span>
-        <span className="text-slate-400 text-[10px]">{openDirection === 'up' ? '▲' : '▼'}</span>
+        {/* 🌟 LOGICA DA SETINHA CORRIGIDA */}
+        <span className="text-slate-400 flex items-center justify-center">
+          {isOpen ? (openDirection === 'up' ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />) : <ChevronDown className="w-4 h-4" />}
+        </span>
       </button>
 
       {isOpen && (
         <>
           <div className="fixed inset-0 z-[9998]" onClick={() => setIsOpen(false)} />
-          {/* 🌟 2. Adicionamos z-[9999] e fixamos a largura no menu para ele pular pra fora das limitações de corte */}
           <div ref={menuRef} className={`absolute left-0 w-full min-w-[160px] bg-white border border-slate-200 rounded-lg shadow-2xl z-[9999] max-h-60 overflow-y-auto divide-y divide-slate-100 animate-in fade-in duration-150 ${
             openDirection === 'up' ? 'bottom-full mb-1 slide-in-from-bottom-2' : 'top-full mt-1 slide-in-from-top-2'
           }`}>

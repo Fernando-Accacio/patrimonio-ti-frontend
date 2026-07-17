@@ -52,7 +52,7 @@ export default function UserManagementTable({ users, currentUser, onUpdateRole, 
           <div className="relative w-full sm:w-56 shrink-0">
             <input 
               type="text" 
-              placeholder="Buscar por nome ou e-mail..."
+              placeholder="Buscar por nome"
               className="w-full pl-8 pr-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               value={searchName}
               onChange={(e) => setSearchName(e.target.value)}

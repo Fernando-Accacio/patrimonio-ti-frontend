@@ -79,12 +79,26 @@ export default function TicketTableRow({
         {ticket?.user?.ramal && <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 inline-block mt-1">Ramal: {ticket.user.ramal}</span>}
       </td>
 
-      <td className="py-4 px-4 pt-5">
-        <div className="flex items-center gap-1.5 whitespace-nowrap mb-0.5">
-          <span className="font-bold text-blue-600 text-sm">{eq ? eq.patrimonio : `ID: ${ticket?.equipment_id}`}</span>
-          {eq?.tipo && <span className="text-xs font-medium text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">{eq.tipo}</span>}
+      {/* 🌟 COLUNA EQUIPAMENTO (Igual ao do Cliente: Patrimonio em cima, Tipo em baixo) */}
+      <td className="py-4 px-4 pt-5 text-center">
+        <div className="flex flex-col items-center justify-center gap-1 whitespace-nowrap">
+          <span className="font-bold text-slate-800 text-sm">
+            {eq ? eq.patrimonio : `ID: ${ticket?.equipment_id}`}
+          </span>
+          {ticket.equipment?.equipmentType?.nome ? (
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded shadow-sm">
+              {ticket.equipment.equipmentType.nome}
+            </span>
+          ) : eq?.tipo ? (
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded shadow-sm">
+              {eq.tipo}
+            </span>
+          ) : (
+            <span className="text-[10px] font-semibold text-slate-400 bg-slate-50 border border-slate-200 px-1.5 py-0.5 rounded">
+              Não identificado
+            </span>
+          )}
         </div>
-        <span className="text-xs text-slate-500 block leading-tight">{eq ? eq.observacao : 'Não informado'}</span>
         
         {!isFinalizado && (
           <button 
@@ -95,14 +109,30 @@ export default function TicketTableRow({
               sector_id: eq ? eq.sector_id : null,
               patrimonio: eq ? eq.patrimonio : ''
             })} 
-            className="mt-2 text-[10px] font-bold text-amber-600 hover:text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200 flex items-center gap-1 transition cursor-pointer"
+            className="mt-2 mx-auto text-[10px] font-bold text-amber-600 hover:text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200 flex items-center gap-1 transition cursor-pointer"
           >
-            <Info className="w-3 h-3" /> Editar Pat. ou Devolver
+            <Info className="w-3 h-3" /> Editar
           </button>
         )}
       </td>
       
-      <td className="py-4 px-4 pt-5">
+      {/* 🌟 NOVA COLUNA: SETOR (Igual ao do Cliente) */}
+      <td className="py-4 px-4 pt-5 text-center">
+        {ticket.equipment?.sector ? (
+          <div className="flex flex-col items-center justify-center gap-0.5 whitespace-nowrap">
+            <span className="text-xs font-bold text-slate-700">{ticket.equipment.sector.nome}</span>
+            {ticket.equipment.sector.prefixo && (
+              <span className="text-[9px] font-extrabold uppercase tracking-wider text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded border border-slate-200">
+                {ticket.equipment.sector.prefixo}
+              </span>
+            )}
+          </div>
+        ) : (
+          <span className="text-xs text-slate-400 italic">Não informado</span>
+        )}
+      </td>
+      
+      <td className="py-4 px-4 pt-5 min-w-[250px] max-w-[400px]">
         {chamadoRetornado && (
           <div className="mb-2 inline-flex items-center gap-2 px-2.5 py-1 bg-orange-100 border border-orange-200 text-orange-700 text-[11px] font-bold rounded-md uppercase tracking-wider animate-pulse">
             <div className="flex items-center gap-1.5">
@@ -119,11 +149,12 @@ export default function TicketTableRow({
           </div>
         )}
 
-        <div className="text-slate-600 break-words text-sm leading-relaxed">
+        {/* 🌟 AQUI ESTÁ A CORREÇÃO DA QUEBRA DE LINHA: Adicionado whitespace-pre-wrap */}
+        <div className="text-slate-600 break-words whitespace-pre-wrap text-sm leading-relaxed">
           {isExpanded ? ticket?.descricao_problema : ticket?.descricao_problema?.length > 50 ? `${ticket.descricao_problema.substring(0, 50)}...` : ticket?.descricao_problema}
         </div>
         {ticket?.descricao_problema?.length > 50 && (
-          <button onClick={() => onToggleExpand(ticket.id)} className="text-sm text-blue-600 hover:underline font-bold block mt-1 cursor-pointer">
+          <button onClick={() => onToggleExpand(ticket.id)} className="text-xs mt-1 text-blue-600 hover:underline font-bold block cursor-pointer">
             {isExpanded ? 'Ocultar Detalhes' : 'Ler Relato Completo'}
           </button>
         )}
@@ -133,6 +164,7 @@ export default function TicketTableRow({
             <strong className={`flex items-center gap-1.5 mb-1 font-bold text-xs uppercase tracking-wider ${ticket?.status_chamado === 'Cancelado' ? 'text-slate-500' : 'text-emerald-700'}`}>
               {ticket?.status_chamado === 'Cancelado' ? <><Info className="w-3.5 h-3.5" /> Motivo do Cancelamento:</> : <><Wrench className="w-3.5 h-3.5" /> Histórico de Diálogo:</>}
             </strong>
+            {/* 🌟 AQUI TAMBÉM: whitespace-pre-wrap para o histórico não estourar a tela */}
             <p className="font-medium text-slate-700 leading-relaxed bg-white/80 p-2 rounded border border-slate-100 mt-1 break-words whitespace-pre-wrap">
               {resolucaoFormatada}
             </p>   
@@ -141,7 +173,6 @@ export default function TicketTableRow({
                 Aguardando confirmação do usuário. Atendimento enviado por {ticket.finalizador.nome}.
               </p>
             )}
-            {/* 🌟 AQUI: ADICIONANDO A CONFIRMAÇÃO DO USUÁRIO NO ADMIN */}
             {ticket?.status_chamado === 'Concluído' && ticket?.confirmador?.nome && (
               <p className="mt-2 text-[12px] font-semibold text-green-700 bg-green-50 border border-green-100 rounded px-2 py-2 leading-snug">
                 Confirmado pelo usuário: {ticket.confirmador.nome}.

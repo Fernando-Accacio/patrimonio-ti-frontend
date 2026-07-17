@@ -1,27 +1,40 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Wrench, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Wrench, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 
 export default function TechMyTicketsTable({ meusChamados, equipments }) {
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchCode, setSearchCode] = useState(''); // 🌟 ESTADO DA PESQUISA
   const itemsPerPage = 10;
+  
+  const [expandedTickets, setExpandedTickets] = useState({});
 
-  // 🌟 REFS E ESTADOS DA BARRA DE ROLAGEM DUPLA
   const topScrollRef = useRef(null);
   const tableScrollRef = useRef(null);
   const [tableWidth, setTableWidth] = useState(1000);
 
-  const totalItems = meusChamados.length;
+  useEffect(() => { setCurrentPage(1); }, [searchCode]);
+
+  // 🌟 LÓGICA DE FILTRAGEM
+  const filteredTickets = meusChamados.filter(tk => {
+    if (!searchCode) return true;
+    const termoBusca = searchCode.toLowerCase();
+    const matchProcesso = tk.codigo_processo?.toLowerCase().includes(termoBusca);
+    const eq = equipments.find(e => e.id === tk.equipment_id);
+    const matchPatrimonio = eq?.patrimonio?.toLowerCase().includes(termoBusca);
+    return matchProcesso || matchPatrimonio;
+  });
+
+  const totalItems = filteredTickets.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentTickets = meusChamados.slice(indexOfFirstItem, indexOfLastItem);
+  const currentTickets = filteredTickets.slice(indexOfFirstItem, indexOfLastItem);
 
-  // 🌟 SINCRONIZAÇÃO DAS BARRAS
   useEffect(() => {
     if (tableScrollRef.current) {
       setTableWidth(tableScrollRef.current.scrollWidth);
     }
-  }, [currentTickets]);
+  }, [currentTickets, expandedTickets]);
 
   const handleTopScroll = () => {
     if (tableScrollRef.current && topScrollRef.current) {
@@ -39,17 +52,34 @@ export default function TechMyTicketsTable({ meusChamados, equipments }) {
     }
   };
 
+  const toggleExpandirChamado = (id) => {
+    setExpandedTickets(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden animate-in fade-in duration-200 flex flex-col">
-      <div className="bg-blue-50/50 px-6 py-4 border-b flex items-center gap-3">
-        <div className="bg-blue-600 p-2 rounded-lg"><Wrench className="w-5 h-5 text-white" /></div>
-        <div>
-          <h2 className="text-lg font-bold text-slate-800">Meus Chamados em Andamento</h2>
-          <p className="text-sm text-slate-500">Tarefas que estão sob sua responsabilidade neste momento.</p>
+      {/* 🌟 CABEÇALHO COM A BARRA DE PESQUISA */}
+      <div className="bg-blue-50/50 px-6 py-4 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex items-center gap-3">
+          <div className="bg-blue-600 p-2 rounded-lg"><Wrench className="w-5 h-5 text-white" /></div>
+          <div>
+            <h2 className="text-lg font-bold text-slate-800">Meus Chamados em Andamento</h2>
+            <p className="text-sm text-slate-500">Tarefas que estão sob sua responsabilidade neste momento.</p>
+          </div>
+        </div>
+        
+        <div className="relative w-full sm:w-72">
+          <input 
+            type="text" 
+            placeholder="Buscar Processo ou Patrimônio..." 
+            className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition bg-white"
+            value={searchCode}
+            onChange={(e) => setSearchCode(e.target.value)}
+          />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
         </div>
       </div>
       
-      {/* 🌟 BARRA DE ROLAGEM SUPERIOR */}
       <div 
         ref={topScrollRef} 
         onScroll={handleTopScroll}
@@ -58,11 +88,10 @@ export default function TechMyTicketsTable({ meusChamados, equipments }) {
         <div style={{ width: `${tableWidth}px`, height: '1px' }}></div>
       </div>
 
-      {/* 🌟 TABELA */}
       <div 
         ref={tableScrollRef}
         onScroll={handleTableScroll}
-        className="overflow-x-auto custom-scrollbar pb-2"
+        className="overflow-x-auto custom-scrollbar min-h-[320px] pb-24"
       >
         <table className="w-full text-left text-slate-600 min-w-[1000px]">
           <thead className="bg-slate-50 text-slate-700 font-medium border-b text-sm uppercase tracking-wider">
@@ -70,13 +99,14 @@ export default function TechMyTicketsTable({ meusChamados, equipments }) {
               <th className="py-3 px-4 text-center whitespace-nowrap">Nº Processo</th>
               <th className="py-3 px-4 whitespace-nowrap">Datas</th>
               <th className="py-3 px-4 whitespace-nowrap">Solicitante</th>
-              <th className="py-3 px-4 whitespace-nowrap">Equipamento</th>
-              <th className="py-3 px-4 w-1/3">Problema</th>
+              <th className="py-3 px-4 text-center whitespace-nowrap">Equipamento</th>
+              <th className="py-3 px-4 text-center whitespace-nowrap">Setor</th>
+              <th className="py-3 px-4 min-w-[300px]">Problema</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {currentTickets.length === 0 ? (
-              <tr><td colSpan="5" className="py-8 text-center text-slate-400 italic text-sm">Você não possui chamados em andamento. Bom trabalho!</td></tr>
+              <tr><td colSpan="6" className="py-8 text-center text-slate-400 italic text-sm">Nenhum chamado encontrado.</td></tr>
             ) : (
               currentTickets.map((tk) => {
                 const eq = equipments.find(e => e.id === tk.equipment_id);
@@ -107,19 +137,50 @@ export default function TechMyTicketsTable({ meusChamados, equipments }) {
                       )}
                     </td>
 
-                    <td className="py-4 px-4 pt-5">
-                      <div className="flex items-center gap-1.5 whitespace-nowrap">
-                        <span className="text-sm font-bold text-slate-700">{eq?.patrimonio || 'S/P'}</span>
-                        {eq?.tipo && (
-                          <span className="text-xs font-medium text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                    <td className="py-4 px-4 pt-5 text-center">
+                      <div className="flex flex-col items-center justify-center gap-1 whitespace-nowrap">
+                        <span className="text-sm font-bold text-slate-800">{eq?.patrimonio || 'S/P'}</span>
+                        {tk.equipment?.equipmentType?.nome ? (
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded shadow-sm">
+                            {tk.equipment.equipmentType.nome}
+                          </span>
+                        ) : eq?.tipo ? (
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded shadow-sm">
                             {eq.tipo}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-semibold text-slate-400 bg-slate-50 border border-slate-200 px-1.5 py-0.5 rounded">
+                            Não identificado
                           </span>
                         )}
                       </div>
-                      <span className="text-xs text-slate-500 block mt-1 leading-tight">{eq?.observacao}</span>
                     </td>
 
-                    <td className="py-4 px-4 pt-5 text-sm leading-relaxed break-words">{tk.descricao_problema}</td>
+                    <td className="py-4 px-4 pt-5 text-center">
+                      {tk.equipment?.sector ? (
+                        <div className="flex flex-col items-center justify-center gap-0.5 whitespace-nowrap">
+                          <span className="text-xs font-bold text-slate-700">{tk.equipment.sector.nome}</span>
+                          {tk.equipment.sector.prefixo && (
+                            <span className="text-[9px] font-extrabold uppercase tracking-wider text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded border border-slate-200">
+                              {tk.equipment.sector.prefixo}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-slate-400 italic">Não informado</span>
+                      )}
+                    </td>
+
+                    <td className="py-4 px-4 pt-5 min-w-[300px] max-w-[400px]">
+                      <div className="text-slate-600 break-words whitespace-pre-wrap text-sm leading-relaxed">
+                        {expandedTickets[tk.id] ? tk.descricao_problema : tk.descricao_problema?.length > 50 ? `${tk.descricao_problema.substring(0, 50)}...` : tk.descricao_problema}
+                      </div>
+                      {tk.descricao_problema?.length > 50 && (
+                        <button onClick={() => toggleExpandirChamado(tk.id)} className="text-xs mt-1 text-blue-600 hover:underline font-bold block cursor-pointer">
+                          {expandedTickets[tk.id] ? 'Ocultar Detalhes' : 'Ler Relato Completo'}
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 );
               })

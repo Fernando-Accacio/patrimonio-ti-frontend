@@ -108,11 +108,11 @@ export default function TicketTable({ tickets, equipments, usersList, filter, on
         <div style={{ width: `${tableWidth}px`, height: '1px' }}></div>
       </div>
 
-      {/* 🌟 TABELA ORIGINAL (Com ref e min-width garantido) */}
+      {/* 🌟 TABELA ORIGINAL */}
       <div 
         ref={tableScrollRef}
         onScroll={handleTableScroll}
-        className="overflow-x-auto custom-scrollbar"
+        className="overflow-x-auto custom-scrollbar min-h-[320px] pb-24" // 🌟 AQUI: min-h e pb adicionados
       >
         <table className="w-full text-left text-slate-600 min-w-[1000px]">
           <thead className="bg-slate-50 text-slate-700 font-medium border-b text-sm uppercase tracking-wider">
@@ -120,7 +120,9 @@ export default function TicketTable({ tickets, equipments, usersList, filter, on
               <th className="py-3 px-4 text-center whitespace-nowrap">Nº Processo</th> 
               <th className="py-3 px-4 whitespace-nowrap">Abertura</th>
               <th className="py-3 px-4 whitespace-nowrap">Solicitante</th>
-              <th className="py-3 px-4 whitespace-nowrap">Patrimônio</th>
+              <th className="py-3 px-4 text-center whitespace-nowrap">Equipamento</th>
+              {/* 🌟 NOVA COLUNA: SETOR */}
+              <th className="py-3 px-4 text-center whitespace-nowrap">Setor</th>
               <th className="py-3 px-4 w-[400px]">Problema & Solução</th>
               <th className="py-3 px-4 text-center whitespace-nowrap">Responsável (TI)</th>
               <th className="py-3 px-4 text-center whitespace-nowrap">Status</th>
@@ -146,7 +148,7 @@ export default function TicketTable({ tickets, equipments, usersList, filter, on
               ))
             ) : (
               <tr>
-                <td colSpan="7" className="py-8 text-center text-slate-500">
+                <td colSpan="8" className="py-8 text-center text-slate-500">
                   Nenhum chamado encontrado com esses filtros ou termos de busca.
                 </td>
               </tr>

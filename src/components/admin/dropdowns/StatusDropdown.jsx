@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Lock } from 'lucide-react';
+import { Lock, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function StatusDropdown({ ticketId, currentStatus, tecnicoId, isFinalizado, onUpdateStatus, isLast, solicitanteNome }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -71,7 +71,6 @@ export default function StatusDropdown({ ticketId, currentStatus, tecnicoId, isF
         'bg-slate-200 text-slate-800 border-slate-400'
       }`}>
         <Lock className="w-3.5 h-3.5 shrink-0 opacity-80" />
-        {/* 🌟 NOME AMIGÁVEL QUANDO ESTÁ TRAVADO */}
         <span>
           {currentStatus === 'Aguardando Confirmação'
             ? 'Aguardando confirmação do usuário'
@@ -82,7 +81,6 @@ export default function StatusDropdown({ ticketId, currentStatus, tecnicoId, isF
   }
 
   return (
-    // 🌟 1. Ajustado o wrapper para usar z-[9999] quando aberto, garantindo prioridade total
     <div className={`relative w-full text-left ${isOpen ? 'z-[9999]' : ''}`}>
       <button
         ref={buttonRef}
@@ -98,21 +96,19 @@ export default function StatusDropdown({ ticketId, currentStatus, tecnicoId, isF
         }`}
       >
         <span>{currentStatus}</span>
-        <span className="text-slate-400 text-[10px]">{openDirection === 'up' ? '▲' : '▼'}</span>
+        {/* 🌟 LOGICA DA SETINHA CORRIGIDA */}
+        <span className="text-slate-400 flex items-center justify-center">
+          {isOpen ? (openDirection === 'up' ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />) : <ChevronDown className="w-4 h-4" />}
+        </span>
       </button>
 
       {isOpen && (
         <>
-          {/* 🌟 2. O backdrop fixo que cobre a tela inteira (z-[9998]) */}
           <div className="fixed inset-0 z-[9998]" onClick={() => setIsOpen(false)} />
-          
-          {/* 🌟 3. A caixa do menu agora tem z-[9999] e min-w-[160px] */}
           <div ref={menuRef} className={`absolute left-0 w-full min-w-[160px] bg-white border border-slate-200 rounded-lg shadow-2xl z-[9999] overflow-hidden divide-y divide-slate-100 animate-in fade-in duration-150 ${
             openDirection === 'up' ? 'bottom-full mb-1 slide-in-from-bottom-2' : 'top-full mt-1 slide-in-from-top-2'
           }`}>
             {options.map(opt => {
-              
-              // Bloqueios
               const isBlockedWithoutTech = ['Em Andamento', 'Aguardando Confirmação', 'Baixa'].includes(opt.value) && !tecnicoId;
               const isBlockedToOpen = opt.value === 'Aberto' && tecnicoId; 
               const isBlocked = isBlockedWithoutTech || isBlockedToOpen;
@@ -137,7 +133,6 @@ export default function StatusDropdown({ ticketId, currentStatus, tecnicoId, isF
                     isBlocked ? 'opacity-50 cursor-not-allowed bg-slate-50 text-slate-400' : `cursor-pointer ${opt.style}`
                   }`}
                 >
-                  {/* 🌟 RENDERIZANDO A LABEL VISUAL E NÃO O VALUE */}
                   {opt.label} 
                   {isBlocked && <Lock className="w-3.5 h-3.5 text-slate-400 mb-0.5" />}
                 </button>
