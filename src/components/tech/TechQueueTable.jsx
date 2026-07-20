@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Inbox, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import TechQueueTableRow from './TechQueueTableRow';
 
 export default function TechQueueTable({ chamadosLivres, equipments }) {
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchCode, setSearchCode] = useState(''); // 🌟 ESTADO DA PESQUISA
+  const [searchCode, setSearchCode] = useState('');
   const itemsPerPage = 10;
   
   const [expandedTickets, setExpandedTickets] = useState({});
@@ -14,7 +15,6 @@ export default function TechQueueTable({ chamadosLivres, equipments }) {
 
   useEffect(() => { setCurrentPage(1); }, [searchCode]);
 
-  // 🌟 LÓGICA DE FILTRAGEM
   const filteredTickets = chamadosLivres.filter(tk => {
     if (!searchCode) return true;
     const termoBusca = searchCode.toLowerCase();
@@ -58,7 +58,6 @@ export default function TechQueueTable({ chamadosLivres, equipments }) {
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden animate-in fade-in duration-200 delay-100 flex flex-col">
-      {/* 🌟 CABEÇALHO COM A BARRA DE PESQUISA */}
       <div className="bg-amber-50/30 px-6 py-4 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-3">
           <div className="bg-amber-500 p-2 rounded-lg"><Inbox className="w-5 h-5 text-white" /></div>
@@ -108,78 +107,15 @@ export default function TechQueueTable({ chamadosLivres, equipments }) {
             {currentTickets.length === 0 ? (
               <tr><td colSpan="6" className="py-8 text-center text-slate-400 italic text-sm">Nenhum chamado encontrado na fila geral.</td></tr>
             ) : (
-              currentTickets.map((tk) => {
-                const eq = equipments.find(e => e.id === tk.equipment_id);
-                const dataDoChamado = tk.createdAt || tk.data_abertura;
-
-                return (
-                  <tr key={tk.id} className="hover:bg-slate-50 transition align-top">
-                    <td className="py-4 px-4 pt-5 align-top text-center">
-                      <span className={`inline-block px-2.5 py-1 text-xs font-bold rounded border ${tk.codigo_processo ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-slate-100 text-slate-400 border-slate-200 font-medium'}`}>
-                        {tk.codigo_processo || 'Antigo / N/A'}
-                      </span>
-                    </td>
-
-                    <td className="py-4 px-4 pt-5 text-sm font-medium text-slate-500 whitespace-nowrap">
-                      {dataDoChamado ? new Date(dataDoChamado).toLocaleString('pt-BR') : 'Sem data'}
-                    </td>
-                    
-                    <td className="py-4 px-4 pt-5">
-                      <span className="text-sm font-semibold text-slate-800 block leading-tight">{tk.user?.nome || 'Removido'}</span>
-                      {tk.user?.ramal && (
-                        <span className="text-[11px] font-medium text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 inline-block mt-1">
-                          Ramal: {tk.user.ramal}
-                        </span>
-                      )}
-                    </td>
-
-                    <td className="py-4 px-4 pt-5 text-center">
-                      <div className="flex flex-col items-center justify-center gap-1 whitespace-nowrap">
-                        <span className="text-sm font-bold text-slate-800">{eq?.patrimonio || 'S/P'}</span>
-                        {tk.equipment?.equipmentType?.nome ? (
-                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded shadow-sm">
-                            {tk.equipment.equipmentType.nome}
-                          </span>
-                        ) : eq?.tipo ? (
-                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded shadow-sm">
-                            {eq.tipo}
-                          </span>
-                        ) : (
-                          <span className="text-[10px] font-semibold text-slate-400 bg-slate-50 border border-slate-200 px-1.5 py-0.5 rounded">
-                            Não identificado
-                          </span>
-                        )}
-                      </div>
-                    </td>
-
-                    <td className="py-4 px-4 pt-5 text-center">
-                      {tk.equipment?.sector ? (
-                        <div className="flex flex-col items-center justify-center gap-0.5 whitespace-nowrap">
-                          <span className="text-xs font-bold text-slate-700">{tk.equipment.sector.nome}</span>
-                          {tk.equipment.sector.prefixo && (
-                            <span className="text-[9px] font-extrabold uppercase tracking-wider text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded border border-slate-200">
-                              {tk.equipment.sector.prefixo}
-                            </span>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-xs text-slate-400 italic">Não informado</span>
-                      )}
-                    </td>
-
-                    <td className="py-4 px-4 pt-5 min-w-[300px] max-w-[400px]">
-                      <div className="text-slate-600 break-words whitespace-pre-wrap text-sm leading-relaxed">
-                        {expandedTickets[tk.id] ? tk.descricao_problema : tk.descricao_problema?.length > 50 ? `${tk.descricao_problema.substring(0, 50)}...` : tk.descricao_problema}
-                      </div>
-                      {tk.descricao_problema?.length > 50 && (
-                        <button onClick={() => toggleExpandirChamado(tk.id)} className="text-xs mt-1 text-blue-600 hover:underline font-bold block cursor-pointer">
-                          {expandedTickets[tk.id] ? 'Ocultar Detalhes' : 'Ler Relato Completo'}
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })
+              currentTickets.map((tk) => (
+                <TechQueueTableRow 
+                  key={tk.id}
+                  ticket={tk}
+                  equipments={equipments}
+                  isExpanded={!!expandedTickets[tk.id]}
+                  onToggleExpand={toggleExpandirChamado}
+                />
+              ))
             )}
           </tbody>
         </table>

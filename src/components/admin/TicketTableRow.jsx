@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Info, Wrench, AlertCircle, X } from 'lucide-react';
+import { Info, AlertCircle, X } from 'lucide-react';
 import TechDropdown from './dropdowns/TechDropdown';
 import StatusDropdown from './dropdowns/StatusDropdown';
+import TicketHistory from './TicketHistory'; // 🌟 Importando o novo componente
 
 export default function TicketTableRow({ 
   ticket, equipments, usersList, tecnicos, isExpanded, onToggleExpand, onAssignTechnician, onUpdateStatus, isLast, isLastTech, onDevolverClick
@@ -29,21 +30,6 @@ export default function TicketTableRow({
     }
   }, [ticket?.id, ticket?.resolucao_ti]);
 
-  let resolucaoFormatada = (ticket?.resolucao_ti || '').toString();
-
-  // 🌟 1. Formata a resposta direta do técnico (primeira linha)
-  if (resolucaoFormatada.trim() && !resolucaoFormatada.trim().startsWith('[')) {
-    const linhas = resolucaoFormatada.split('\n');
-    linhas[0] = `Resolução: "${linhas[0]}"`;
-    resolucaoFormatada = linhas.join('\n');
-  }
-
-  // 🌟 2. Traduz as tags automáticas do sistema
-  resolucaoFormatada = resolucaoFormatada.replace(/\[(?:CONFIRMADO PELO USUÁRIO|CONFIRMAÇÃO DO USUÁRIO)\]:\s*(.+)/gi, 'Confirmação do Usuário: "$1"');
-  resolucaoFormatada = resolucaoFormatada.replace(/\[RECUSADO PELO USUÁRIO\]:\s*(.+)/gi, 'Recusa do Usuário: "$1"');
-  resolucaoFormatada = resolucaoFormatada.replace(/\[CANCELADO PELO USUÁRIO\]:\s*(.+)/gi, 'Cancelado pelo Usuário: "$1"');
-  resolucaoFormatada = resolucaoFormatada.replace(/\[SISTEMA\]:\s*(.+)/gi, 'Sistema: "$1"');
-  resolucaoFormatada = resolucaoFormatada.replace(/\[OBSERVAÇÃO DO SUPORTE\]:\s*(.+)/gi, 'Observação do Suporte: "$1"');
   const textoResolucao = (ticket?.resolucao_ti || '').toString().trim();
   const tagsEncontradas = [...textoResolucao.matchAll(/\[(OBSERVAÇÃO DO SUPORTE|CONFIRMAÇÃO DO USUÁRIO|RECUSADO PELO USUÁRIO)\]/g)];
   
@@ -87,7 +73,6 @@ export default function TicketTableRow({
         {ticket?.user?.ramal && <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 inline-block mt-1">Ramal: {ticket.user.ramal}</span>}
       </td>
 
-      {/* 🌟 COLUNA EQUIPAMENTO (Igual ao do Cliente: Patrimonio em cima, Tipo em baixo) */}
       <td className="py-4 px-4 pt-5 text-center">
         <div className="flex flex-col items-center justify-center gap-1 whitespace-nowrap">
           <span className="font-bold text-slate-800 text-sm">
@@ -124,7 +109,6 @@ export default function TicketTableRow({
         )}
       </td>
       
-      {/* 🌟 NOVA COLUNA: SETOR (Igual ao do Cliente) */}
       <td className="py-4 px-4 pt-5 text-center">
         {ticket.equipment?.sector ? (
           <div className="flex flex-col items-center justify-center gap-0.5 whitespace-nowrap">
@@ -157,7 +141,6 @@ export default function TicketTableRow({
           </div>
         )}
 
-        {/* 🌟 AQUI ESTÁ A CORREÇÃO DA QUEBRA DE LINHA: Adicionado whitespace-pre-wrap */}
         <div className="text-slate-600 break-words whitespace-pre-wrap text-sm leading-relaxed">
           {isExpanded ? ticket?.descricao_problema : ticket?.descricao_problema?.length > 50 ? `${ticket.descricao_problema.substring(0, 50)}...` : ticket?.descricao_problema}
         </div>
@@ -167,27 +150,8 @@ export default function TicketTableRow({
           </button>
         )}
 
-        {resolucaoFormatada.trim() && (
-          <div className={`mt-3 p-3 border border-slate-200 border-l-4 rounded-r-lg text-sm shadow-xs bg-slate-50 w-full min-w-[320px] max-w-[400px] ${ticket?.status_chamado === 'Cancelado' ? 'border-l-slate-400' : 'border-l-emerald-500'}`}>
-            <strong className={`flex items-center gap-1.5 mb-1 font-bold text-xs uppercase tracking-wider ${ticket?.status_chamado === 'Cancelado' ? 'text-slate-500' : 'text-emerald-700'}`}>
-              {ticket?.status_chamado === 'Cancelado' ? <><Info className="w-3.5 h-3.5" /> Motivo do Cancelamento:</> : <><Wrench className="w-3.5 h-3.5" /> Histórico de Diálogo:</>}
-            </strong>
-            {/* 🌟 AQUI TAMBÉM: whitespace-pre-wrap para o histórico não estourar a tela */}
-            <p className="font-medium text-slate-700 leading-relaxed bg-white/80 p-2 rounded border border-slate-100 mt-1 break-words whitespace-pre-wrap">
-              {resolucaoFormatada}
-            </p>   
-            {ticket?.status_chamado === 'Aguardando Confirmação' && ticket?.finalizador?.nome && (
-              <p className="mt-2 text-[12px] font-semibold text-purple-700 bg-purple-50 border border-purple-100 rounded px-2 py-2 leading-snug">
-                Aguardando confirmação do usuário. Atendimento enviado por {ticket.finalizador.nome}.
-              </p>
-            )}
-            {ticket?.status_chamado === 'Concluído' && ticket?.confirmador?.nome && (
-              <p className="mt-2 text-[12px] font-semibold text-green-700 bg-green-50 border border-green-100 rounded px-2 py-2 leading-snug">
-                Confirmado pelo usuário: {ticket.confirmador.nome}.
-              </p>
-            )}
-          </div>
-        )}
+        {/* 🌟 Componente externo sendo chamado aqui de forma limpa */}
+        <TicketHistory ticket={ticket} />
       </td>
 
       <td className="py-4 px-4 text-center align-middle min-w-[220px] pt-4">
