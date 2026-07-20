@@ -19,8 +19,11 @@ export default function MyTicketsTableRow({
       setErroConfirmacao('Digite o que faltou para concluir antes de retornar o chamado.');
       return;
     }
+    
     setErroConfirmacao('');
     onResponderConfirmacao(ticket.id, aprovado, comentario.trim());
+    
+    setComentario(''); 
   };
 
   const handleKeyDownConfirmacao = (e) => {
