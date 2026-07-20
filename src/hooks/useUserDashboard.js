@@ -8,11 +8,9 @@ export function useUserDashboard(user, logoutContext, navigate) {
   const [tecnicosDisponiveis, setTecnicosDisponiveis] = useState([]); 
   const [showProfileModal, setShowProfileModal] = useState(false);
   
-  // 🌟 NOVO: Estado para gerenciar o filtro de chamados selecionado
   const [filtroStatus, setFiltroStatus] = useState('Todos');
 
   const [patrimonio, setPatrimonio] = useState('');
-  // 🌟 Importante: 'tipo' agora guarda o equipment_type_id, e 'localizacao' guarda o sector_id
   const [tipo, setTipo] = useState('');
   const [localizacao, setLocalizacao] = useState('');
   const [descricao, setDescricao] = useState('');
@@ -22,6 +20,7 @@ export function useUserDashboard(user, logoutContext, navigate) {
   const [promptModal, setPromptModal] = useState({ show: false, title: '', placeholder: '', inputValue: '', onConfirm: null, isPassword: false });
 
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
     setTimeout(() => setToast(prev => ({ ...prev, show: false })), 5000); 
@@ -65,7 +64,6 @@ export function useUserDashboard(user, logoutContext, navigate) {
     setTecnicoIdSelecionado(ticket.tecnico_id || '');
     if (matchedEq) {
       setPatrimonio(matchedEq.patrimonio);
-      // 🌟 Atualizado: Carrega os IDs em vez das antigas strings
       setTipo(matchedEq.equipment_type_id || '');
       setLocalizacao(matchedEq.sector_id || '');
     }
@@ -113,13 +111,12 @@ export function useUserDashboard(user, logoutContext, navigate) {
     e.preventDefault();
     const tecnicoPayload = tecnicoIdSelecionado ? Number(tecnicoIdSelecionado) : null;
     
-    // 🌟 MÁGICA FINAL AQUI: Trocando os nomes das chaves!
     const payload = { 
       patrimonio, 
       descricao_problema: descricao, 
       tecnico_id: tecnicoPayload,
-      equipment_type_id: Number(tipo),  // O front manda o que tava no estado 'tipo' com o nome novo
-      sector_id: Number(localizacao)    // O front manda o que tava em 'localizacao' com o nome novo
+      equipment_type_id: Number(tipo),  
+      sector_id: Number(localizacao)    
     };
 
     try {
@@ -137,23 +134,31 @@ export function useUserDashboard(user, logoutContext, navigate) {
     }
   };
 
-  // 🌟 NOVO: Realiza o filtro lógico em tempo real
+  // 🌟 NOVO: Função de confirmação transferida pra cá!
+  const handleResponderConfirmacao = async (ticketId, aprovado, motivo) => {
+    try {
+      await api.patch(`/tickets/${ticketId}/confirmar`, { aprovado, motivo });
+      showToast(`Chamado ${aprovado ? 'finalizado com sucesso!' : 'retornado para a TI.'}`, 'success');
+      carregarDados(); 
+    } catch (error) {
+      console.error("Erro na confirmação:", error);
+      showToast(error.response?.data?.error || 'Erro ao processar resposta.', 'error');
+    }
+  };
+
   const chamadosFiltrados = meusChamados.filter((ticket) => {
     if (filtroStatus === 'Todos') return true;
     return ticket.status_chamado === filtroStatus;
   });
 
   return {
-    meusChamados, 
-    chamadosFiltrados, // 🌟 Retornando a lista filtrada
-    filtroStatus,      // 🌟 Retornando o status selecionado
-    setFiltroStatus,   // 🌟 Retornando a função de alteração do filtro
+    meusChamados, chamadosFiltrados, filtroStatus, setFiltroStatus,
     equipments, showProfileModal, setShowProfileModal,
     tecnicosDisponiveis, tecnicoIdSelecionado, setTecnicoIdSelecionado,
     patrimonio, setPatrimonio, tipo, setTipo, localizacao, setLocalizacao,
     descricao, setDescricao, editingTicketId, toast, setToast, showToast,
     promptModal, setPromptModal, handleCancelarChamado,
     handleIniciarEdicao, handleCancelarEdicao, handleSubmitForm, carregarDados,
-    handleSalvarEdicaoDireta
+    handleSalvarEdicaoDireta, handleResponderConfirmacao // 🌟 Exportando a função!
   };
 }

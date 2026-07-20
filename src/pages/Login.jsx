@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { LogIn, MonitorSmartphone, Eye, EyeOff, X, CheckCircle2 } from 'lucide-react';
+import { LogIn, MonitorSmartphone, Eye, EyeOff } from 'lucide-react';
 import { useAuthForm } from '../hooks/useAuthForm';
 import api from '../services/api';
+import ResetPasswordModal from '../components/modals/ResetPasswordModal'; // 🌟 Importando o Modal limpo
 
 export default function Login() {
   const hook = useAuthForm();
@@ -12,7 +13,6 @@ export default function Login() {
   const [resetError, setResetError] = useState('');
   const [resetSuccess, setResetSuccess] = useState(false);
 
-  // Função para fechar e limpar TUDO do modal
   const handleCloseModal = () => {
     setShowResetModal(false);
     setResetEmail('');
@@ -29,7 +29,7 @@ export default function Login() {
     try {
       await api.post('/password-resets/request', { email: resetEmail });
       setResetSuccess(true);
-      setResetEmail(''); // Limpa o input se der sucesso também!
+      setResetEmail('');
     } catch (err) {
       const erroApi = err.response?.data?.error;
       let erroAmigavel = 'Erro ao enviar solicitação. Verifique o e-mail.';
@@ -41,7 +41,6 @@ export default function Login() {
       } else if (erroApi) {
         erroAmigavel = erroApi; 
       }
-
       setResetError(erroAmigavel);
     } finally {
       setResetLoading(false);
@@ -95,57 +94,17 @@ export default function Login() {
         </div>
       </div>
 
-      {showResetModal && (
-        <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in duration-200">
-            <div className="bg-slate-50 px-6 py-4 border-b flex justify-between items-center">
-              <h3 className="text-base font-bold text-slate-800">Recuperação de Acesso</h3>
-              <button onClick={handleCloseModal} className="text-slate-400 hover:text-red-500 cursor-pointer"><X className="w-5 h-5" /></button>
-            </div>
-            
-            <form onSubmit={handleSendResetRequest} className="p-6 space-y-4">
-              {resetError && <div className="p-3 bg-red-100 text-red-700 text-xs rounded font-medium">{resetError}</div>}
-              
-              {resetSuccess ? (
-                <div className="p-4 bg-green-50 text-green-800 rounded-lg text-xs border border-green-200 flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
-                  <div>
-                    <strong className="block font-bold text-green-900 mb-0.5">Solicitação Pendente!</strong>
-                    Seu pedido de redefinição foi enviado para a equipe de TI. Assim que um administrador aprovar, sua nova senha automática chegará no seu e-mail institucional.
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    Insira seu e-mail institucional cadastrado abaixo. O suporte técnico analisará seu pedido para liberar uma nova senha segura.
-                  </p>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 uppercase mb-1" htmlFor="email-reset">Seu E-mail Cadastrado</label>
-                    <input 
-                      type="email" id="email-reset" required 
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-600 outline-none text-sm"
-                      placeholder="seu.nome@itapecerica.sp.gov.br"
-                      value={resetEmail}
-                      onChange={(e) => setResetEmail(e.target.value)}
-                    />
-                  </div>
-                </>
-              )}
-
-              <div className="pt-2 flex gap-3">
-                <button type="button" onClick={handleCloseModal} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 rounded-lg text-xs cursor-pointer">
-                  {resetSuccess ? 'Fechar Janela' : 'Cancelar'}
-                </button>
-                {!resetSuccess && (
-                  <button type="submit" disabled={resetLoading} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg text-xs disabled:bg-blue-400 cursor-pointer">
-                    {resetLoading ? 'Enviando...' : 'Solicitar ao TI'}
-                  </button>
-                )}
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* 🌟 MODAL INJETADO DE FORMA LIMPA */}
+      <ResetPasswordModal 
+        show={showResetModal}
+        onClose={handleCloseModal}
+        onSubmit={handleSendResetRequest}
+        resetEmail={resetEmail}
+        setResetEmail={setResetEmail}
+        resetLoading={resetLoading}
+        resetError={resetError}
+        resetSuccess={resetSuccess}
+      />
     </div>
   );
 }

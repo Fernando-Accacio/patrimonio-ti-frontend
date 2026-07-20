@@ -1,42 +1,18 @@
 import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import api from '../services/api';
-
 import { useUserDashboard } from '../hooks/useUserDashboard';
 import Header from '../components/layout/Header';
 import TicketForm from '../components/user/TicketForm';
 import MyTicketsTable from '../components/user/MyTicketsTable';
 import UserProfileModal from '../components/modals/UserProfileModal';
 import GlobalModals from '../components/modals/GlobalModals';
-import { CheckCircle2, AlertCircle, X, ChevronDown } from 'lucide-react'; // 🌟 Importado ChevronDown
+import { CheckCircle2, AlertCircle, X, ChevronDown } from 'lucide-react'; 
 
 export default function UserDashboard() {
   const { user, logoutContext } = useContext(AuthContext); 
   const navigate = useNavigate();
   const hook = useUserDashboard(user, logoutContext, navigate);
-
-  const handleResponderConfirmacao = async (ticketId, aprovado, motivo) => {
-    try {
-      await api.patch(`/tickets/${ticketId}/confirmar`, { 
-        aprovado, 
-        motivo 
-      });
-
-      hook.showToast(
-        `Chamado ${aprovado ? 'finalizado com sucesso!' : 'retornado para a TI.'}`, 
-        'success'
-      );
-      
-      hook.carregarDados(); 
-    } catch (error) {
-      console.error("Erro na confirmação:", error);
-      hook.showToast(
-        error.response?.data?.error || 'Erro ao processar resposta de confirmação.', 
-        'error'
-      );
-    }
-  };
 
   return (
     <div className="min-h-screen bg-slate-100 relative overflow-hidden">
@@ -54,9 +30,8 @@ export default function UserDashboard() {
             tecnicoIdSelecionado={hook.tecnicoIdSelecionado} setTecnicoIdSelecionado={hook.setTecnicoIdSelecionado} 
           />
         </div>
-        <div className="md:col-span-2 space-y-4"> {/* 🌟 Adicionado espaço entre elementos */}
+        <div className="md:col-span-2 space-y-4">
           
-          {/* 🌟 NOVO: Painel de Controle de Filtros por Status com visual moderno */}
           <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wider">
               Minhas Solicitações
@@ -81,11 +56,11 @@ export default function UserDashboard() {
           </div>
 
           <MyTicketsTable 
-            tickets={hook.chamadosFiltrados} // 🌟 PASSANDO A LISTA JÁ FILTRADA!
+            tickets={hook.chamadosFiltrados} 
             equipments={hook.equipments} 
             onEditClick={hook.handleIniciarEdicao} 
             onCancelTicketClick={hook.handleCancelarChamado}
-            onResponderConfirmacao={handleResponderConfirmacao}
+            onResponderConfirmacao={hook.handleResponderConfirmacao} // 🌟 Sendo chamada via hook limpo!
             onFastReply={hook.handleSalvarEdicaoDireta}
           />
         </div>
