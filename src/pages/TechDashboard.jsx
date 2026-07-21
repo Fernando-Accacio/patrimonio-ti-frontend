@@ -6,15 +6,28 @@ import { useTechDashboard } from '../hooks/useTechDashboard';
 import Header from '../components/layout/Header';
 import TechMyTicketsTable from '../components/tech/TechMyTicketsTable';
 import TechQueueTable from '../components/tech/TechQueueTable';
-import TechHistoryTable from '../components/tech/TechHistoryTable'; // <-- IMPORTADO AQUI
+import TechHistoryTable from '../components/tech/TechHistoryTable'; 
 import UserProfileModal from '../components/modals/UserProfileModal';
 import GlobalModals from '../components/modals/GlobalModals';
+import FirstAccessLock from '../components/modals/FirstAccessLock'; // 🌟 IMPORTADO AQUI
 import { CheckCircle2, AlertCircle, X } from 'lucide-react';
 
 export default function TechDashboard() {
-  const { user, logoutContext } = useContext(AuthContext);
+  const { user, logoutContext, loginContext } = useContext(AuthContext); // 🌟 PUXEI O loginContext
   const navigate = useNavigate();
   const hook = useTechDashboard(user, logoutContext, navigate);
+
+  // 🌟 TRAVA DE SEGURANÇA APLICADA AO TÉCNICO
+  if (user?.primeira_senha) {
+    return (
+      <FirstAccessLock 
+        user={user} 
+        logoutContext={logoutContext} 
+        loginContext={loginContext} 
+        onSuccess={(msg) => hook.showToast(msg, 'success')} 
+      />
+    );
+  }
 
   if (hook.loading) return <div className="min-h-screen flex items-center justify-center text-slate-500">Carregando Painel Técnico...</div>;
 
@@ -31,7 +44,6 @@ export default function TechDashboard() {
           chamadosLivres={hook.chamadosLivres} equipments={hook.equipments} usersList={hook.usersList} 
         />
 
-        {/* NOVA TABELA AQUI */}
         <TechHistoryTable 
           historicoRecente={hook.historicoRecente} equipments={hook.equipments} usersList={hook.usersList} 
         />

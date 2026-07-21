@@ -18,7 +18,7 @@ export default function DashboardStats({ equipments, tickets, currentFilter, set
       >
         <div className="bg-blue-100 p-3 rounded-lg text-blue-600"><Monitor className="w-8 h-8" /></div>
         <div>
-          <p className="text-sm text-slate-500 font-medium">Total de Equipamentos</p>
+          <p className="text-sm text-slate-500 font-medium">Total de Chamados</p>
           <p className="text-2xl font-bold text-slate-800">{equipments.length}</p>
         </div>
       </div>
