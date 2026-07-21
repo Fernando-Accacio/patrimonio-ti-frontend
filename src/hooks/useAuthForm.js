@@ -35,10 +35,10 @@ export function useAuthForm() {
     const emailTrimmed = email.trim().toLowerCase();
 
     // 🌟 VALIDAÇÃO ESTRITA: Se o e-mail não terminar com o domínio oficial da prefeitura
-    if (!emailTrimmed.endsWith('@itapecerica.sp.gov.br')) {
-      setErro('Acesso Negado: Use o formato oficial completo do seu e-mail institucional: seu.nome@itapecerica.sp.gov.br');
-      return;
-    }
+    // if (!emailTrimmed.endsWith('@itapecerica.sp.gov.br')) {
+    //   setErro('Acesso Negado: Use o formato oficial...');
+    //   return;
+    // }
 
     try {
       const response = await api.post('/login', { email: emailTrimmed, senha });
@@ -64,10 +64,10 @@ export function useAuthForm() {
     const emailTrimmed = email.trim().toLowerCase();
 
     // 🌟 VALIDAÇÃO LOCAL: Evita chamadas desnecessárias se o e-mail estiver fora do padrão
-    if (!emailTrimmed.endsWith('@itapecerica.sp.gov.br')) {
-      setErro('O e-mail precisa obrigatoriamente terminar com @itapecerica.sp.gov.br');
-      return;
-    }
+    // if (!emailTrimmed.endsWith('@itapecerica.sp.gov.br')) {
+    //   setErro('O e-mail precisa obrigatoriamente...');
+    //   return;
+    // }
 
     if (!matricula.trim()) {
       setErro('A matrícula funcional é obrigatória para solicitar o acesso.');

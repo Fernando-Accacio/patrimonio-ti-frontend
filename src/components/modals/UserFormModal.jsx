@@ -14,10 +14,10 @@ export default function UserFormModal({ show, onClose, onSubmit, novoUser, setNo
     const emailTrimmed = (novoUser?.email || '').trim().toLowerCase();
 
     // 1. Validação estrita do e-mail institucional
-    if (!emailTrimmed.endsWith('@itapecerica.sp.gov.br')) {
-      setErroLocal('O e-mail precisa obrigatoriamente terminar com @itapecerica.sp.gov.br');
-      return;
-    }
+    // if (!emailTrimmed.endsWith('@itapecerica.sp.gov.br')) {
+    //   setErroLocal('O e-mail precisa obrigatoriamente terminar com @itapecerica.sp.gov.br');
+    //   return;
+    // }
 
     // 2. Validação estrita do ramal obrigatório
     if (!novoUser?.ramal || !novoUser.ramal.trim()) {

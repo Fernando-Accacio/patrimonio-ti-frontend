@@ -9,6 +9,7 @@ export function useAdminDashboard(user, logoutContext, navigate) {
   const [resetRequests, setResetRequests] = useState([]); 
   const [resetHistory, setResetHistory] = useState([]); 
   const [loading, setLoading] = useState(true);
+  const [isProcessingAction, setIsProcessingAction] = useState(false);
   
   const [activeTab, setActiveTab] = useState('dashboard');
   const [statusFilter, setStatusFilter] = useState('Todos');
@@ -89,22 +90,30 @@ export function useAdminDashboard(user, logoutContext, navigate) {
   };
 
   const handleAprovarReset = async (id) => {
+    if (isProcessingAction) return; // 🌟 Se já estiver processando um clique, ignora os próximos!
+    setIsProcessingAction(true);
     try {
       await api.post(`/password-resets/${id}/approve`);
       showToast('Solicitação aprovada! Nova senha gerada.', 'success');
       fetchData();
     } catch (err) {
       showToast(err.response?.data?.error || 'Erro ao aprovar reset.', 'error');
+    } finally {
+      setIsProcessingAction(false); // 🌟 Libera o botão no final
     }
   };
 
   const handleRecusarReset = async (id) => {
+    if (isProcessingAction) return; // 🌟 Mesma trava aqui
+    setIsProcessingAction(true);
     try {
       await api.post(`/password-resets/${id}/reject`);
       showToast('Solicitação recusada com sucesso.', 'success');
       fetchData();
     } catch (err) {
       showToast(err.response?.data?.error || 'Erro ao recusar reset.', 'error');
+    } finally {
+      setIsProcessingAction(false);
     }
   };
 
