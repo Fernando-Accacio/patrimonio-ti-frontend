@@ -1,11 +1,16 @@
 import React from 'react';
 
 export default function TechQueueTableRow({ ticket, equipments, isExpanded, onToggleExpand }) {
-  const eq = equipments.find(e => e.id === ticket.equipment_id);
+  // Garantimos que equipments não é undefined antes do find
+  const eq = equipments?.find(e => e.id === ticket.equipment_id);
   const dataDoChamado = ticket.createdAt || ticket.data_abertura;
+
+  // O SEGREDO ESTÁ AQUI: Fallback unificado
+  const currentEq = ticket.equipment || eq;
 
   return (
     <tr className="hover:bg-slate-50 transition align-top">
+      {/* ... (Colunas de Processo, Data e Solicitante continuam iguais) ... */}
       <td className="py-4 px-4 pt-5 align-top text-center">
         <span className={`inline-block px-2.5 py-1 text-xs font-bold rounded border ${ticket.codigo_processo ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-slate-100 text-slate-400 border-slate-200 font-medium'}`}>
           {ticket.codigo_processo || 'Antigo / N/A'}
@@ -25,16 +30,17 @@ export default function TechQueueTableRow({ ticket, equipments, isExpanded, onTo
         )}
       </td>
 
+      {/* COLUNA DE EQUIPAMENTO ATUALIZADA */}
       <td className="py-4 px-4 pt-5 text-center">
         <div className="flex flex-col items-center justify-center gap-1 whitespace-nowrap">
-          <span className="text-sm font-bold text-slate-800">{eq?.patrimonio || 'S/P'}</span>
-          {ticket.equipment?.equipmentType?.nome ? (
+          <span className="text-sm font-bold text-slate-800">{currentEq?.patrimonio || 'S/P'}</span>
+          {currentEq?.equipmentType?.nome ? (
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded shadow-sm">
-              {ticket.equipment.equipmentType.nome}
+              {currentEq.equipmentType.nome}
             </span>
-          ) : eq?.tipo ? (
+          ) : currentEq?.tipo ? (
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded shadow-sm">
-              {eq.tipo}
+              {currentEq.tipo}
             </span>
           ) : (
             <span className="text-[10px] font-semibold text-slate-400 bg-slate-50 border border-slate-200 px-1.5 py-0.5 rounded">
@@ -44,13 +50,14 @@ export default function TechQueueTableRow({ ticket, equipments, isExpanded, onTo
         </div>
       </td>
 
+      {/* COLUNA DE SETOR ATUALIZADA */}
       <td className="py-4 px-4 pt-5 text-center">
-        {ticket.equipment?.sector ? (
+        {currentEq?.sector ? (
           <div className="flex flex-col items-center justify-center gap-0.5 whitespace-nowrap">
-            <span className="text-xs font-bold text-slate-700">{ticket.equipment.sector.nome}</span>
-            {ticket.equipment.sector.prefixo && (
+            <span className="text-xs font-bold text-slate-700">{currentEq.sector.nome}</span>
+            {currentEq.sector.prefixo && (
               <span className="text-[9px] font-extrabold uppercase tracking-wider text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded border border-slate-200">
-                {ticket.equipment.sector.prefixo}
+                {currentEq.sector.prefixo}
               </span>
             )}
           </div>
