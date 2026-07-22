@@ -7,12 +7,15 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // A sessão é isolada por aba para permitir testar perfis diferentes ao mesmo tempo.
     const token = sessionStorage.getItem('@PatrimonioTI:token');
     const storedUser = sessionStorage.getItem('@PatrimonioTI:user');
 
     if (token && storedUser) {
-      setUser(JSON.parse(storedUser));
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        sessionStorage.clear();
+      }
     }
     setLoading(false);
   }, []);

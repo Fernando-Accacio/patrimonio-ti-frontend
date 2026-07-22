@@ -8,7 +8,7 @@ export function useAuthForm() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [ramal, setRamal] = useState('');
-  const [matricula, setMatricula] = useState(''); // 🌟 Já estava aqui, excelente!
+  const [matricula, setMatricula] = useState('');
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -20,9 +20,6 @@ export function useAuthForm() {
     const resData = error.response?.data;
     if (resData) {
       if (resData.error === 'Bad Request') return 'Verifique se os dados estão corretos e não há campos vazios.';
-      
-      // 🌟 CORREÇÃO DE RETORNO: O seu Express envia a mensagem de erro em 'error' 
-      // (ex: res.status(400).send({ error: e.message })), então priorizamos 'error' e depois 'message'
       return resData.error || resData.message || 'Erro ao conectar com o servidor.';
     }
     return 'Erro de conexão. Verifique se o servidor está rodando.';
@@ -43,10 +40,11 @@ export function useAuthForm() {
       const response = await api.post('/login', { email: emailTrimmed, senha });
       loginContext(response.data.token, response.data.user);
       
-      const role = response.data.user.role;
+      const role = String(response.data.user?.role || '').trim().toUpperCase();
+
       if (role === 'ADMIN') {
         navigate('/admin');
-      } else if (role === 'TECH') {
+      } else if (['TECH', 'TI', 'TECNICO', 'SUPORTE'].includes(role)) {
         navigate('/tech');
       } else {
         navigate('/user');

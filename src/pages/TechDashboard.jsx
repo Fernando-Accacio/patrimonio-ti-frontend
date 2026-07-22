@@ -9,15 +9,14 @@ import TechQueueTable from '../components/tech/TechQueueTable';
 import TechHistoryTable from '../components/tech/TechHistoryTable'; 
 import UserProfileModal from '../components/modals/UserProfileModal';
 import GlobalModals from '../components/modals/GlobalModals';
-import FirstAccessLock from '../components/modals/FirstAccessLock'; // 🌟 IMPORTADO AQUI
+import FirstAccessLock from '../components/modals/FirstAccessLock';
 import { CheckCircle2, AlertCircle, X } from 'lucide-react';
 
 export default function TechDashboard() {
-  const { user, logoutContext, loginContext } = useContext(AuthContext); // 🌟 PUXEI O loginContext
+  const { user, logoutContext, loginContext } = useContext(AuthContext);
   const navigate = useNavigate();
   const hook = useTechDashboard(user, logoutContext, navigate);
 
-  // 🌟 TRAVA DE SEGURANÇA APLICADA AO TÉCNICO
   if (user?.primeira_senha) {
     return (
       <FirstAccessLock 
@@ -49,7 +48,6 @@ export default function TechDashboard() {
         />
       </main>
 
-      {/* Modais Globais */}
       <UserProfileModal show={hook.showProfileModal} onClose={() => hook.setShowProfileModal(false)} user={user} onSuccess={(msg) => hook.showToast(msg, 'success')} />
       <GlobalModals 
         alertModal={{ show: false, title: '', message: '' }} setAlertModal={() => {}} 
@@ -57,7 +55,6 @@ export default function TechDashboard() {
         promptModal={hook.promptModal} setPromptModal={hook.setPromptModal} 
       />
 
-      {/* Toast Notificação */}
       {hook.toast.show && (
         <div className={`fixed bottom-6 right-6 z-[999] flex items-center gap-3 px-5 py-4 rounded-lg shadow-2xl text-white font-medium text-sm animate-in slide-in-from-bottom-8 fade-in duration-300 ${
           hook.toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'

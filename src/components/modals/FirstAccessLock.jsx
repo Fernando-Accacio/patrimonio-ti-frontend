@@ -21,8 +21,8 @@ export default function FirstAccessLock({ user, logoutContext, loginContext, onS
     try {
       await api.patch('/users/me/password', { novaSenha });
       
-      const token = localStorage.getItem('token');
-      // Atualiza o contexto, forçando o React a re-renderizar e liberar a tela
+      const token = sessionStorage.getItem('@PatrimonioTI:token');
+      
       loginContext(token, { ...user, primeira_senha: false });
       
       if (onSuccess) onSuccess('Senha atualizada com sucesso! Acesso liberado.');
@@ -37,7 +37,6 @@ export default function FirstAccessLock({ user, logoutContext, loginContext, onS
     <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4 fixed inset-0 z-[999]">
       <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 animate-in fade-in zoom-in duration-300">
         
-        {/* Cabeçalho igual ao Login/Cadastro */}
         <div className="flex flex-col items-center mb-8">
           <div className="bg-blue-600 p-3 rounded-full mb-4 shadow-md">
             <MonitorSmartphone className="w-8 h-8 text-white" />
@@ -46,7 +45,6 @@ export default function FirstAccessLock({ user, logoutContext, loginContext, onS
           <p className="text-slate-500 font-medium text-center">Configuração de Primeiro Acesso</p>
         </div>
 
-        {/* Mensagem de Instrução */}
         <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800 flex items-start gap-3">
           <Lock className="w-5 h-5 shrink-0 mt-0.5" />
           <div>

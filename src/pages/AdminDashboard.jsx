@@ -17,12 +17,24 @@ import EquipmentFormModal from '../components/modals/EquipmentFormModal';
 import UserProfileModal from '../components/modals/UserProfileModal';
 import GlobalModals from '../components/modals/GlobalModals';
 import UserFormModal from '../components/modals/UserFormModal';
+import FirstAccessLock from '../components/modals/FirstAccessLock';
 import { CheckCircle2, AlertCircle, X } from 'lucide-react';
 
 export default function AdminDashboard() {
-  const { user, logoutContext } = useContext(AuthContext);
+  const { user, logoutContext, loginContext } = useContext(AuthContext);
   const navigate = useNavigate();
   const hook = useAdminDashboard(user, logoutContext, navigate);
+
+  if (user?.primeira_senha) {
+    return (
+      <FirstAccessLock 
+        user={user} 
+        logoutContext={logoutContext} 
+        loginContext={loginContext} 
+        onSuccess={(msg) => hook.showToast(msg, 'success')} 
+      />
+    );
+  }
 
   if (hook.loading) return <div className="min-h-screen flex items-center justify-center text-slate-500">Carregando painel Admin...</div>;
 
@@ -41,7 +53,6 @@ export default function AdminDashboard() {
       <main className="max-w-7xl mx-auto px-4 py-8 space-y-8">
         {hook.activeTab === 'dashboard' && (
           <>
-            {/* 🌟 STATS (Estatísticas e Filtros) ficam no topo agora */}
             <DashboardStats 
               equipments={hook.equipments} 
               tickets={hook.tickets} 
@@ -49,7 +60,6 @@ export default function AdminDashboard() {
               setFilter={hook.setStatusFilter} 
             />
 
-            {/* 🌟 TABELA GERAL (Paginação) logo abaixo */}
             <TicketTable 
               tickets={hook.tickets} 
               equipments={hook.equipments} 
@@ -78,7 +88,6 @@ export default function AdminDashboard() {
         )}
       </main>
       
-      {/* Modais */}
       <UserFormModal show={hook.showUserModal} onClose={() => hook.setShowUserModal(false)} onSubmit={hook.handleCadastrarUsuario} novoUser={hook.novoUser} setNovoUser={hook.setNovoUser} />
       <EquipmentFormModal show={hook.showModal} onClose={() => hook.setShowModal(false)} onSubmit={hook.handleCadastrarEquipamento} novoEq={hook.novoEq} setNovoEq={hook.setNovoEq} />
       <UserProfileModal show={hook.showProfileModal} onClose={() => hook.setShowProfileModal(false)} user={user} onSuccess={(msg) => hook.showToast(msg, 'success')} />
@@ -95,7 +104,6 @@ export default function AdminDashboard() {
         equipments={hook.equipments}
       />
       
-      {/* TOAST FLUTUANTE */}
       {hook.toast.show && (
         <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-4 rounded-lg shadow-2xl text-white font-medium text-sm animate-in slide-in-from-bottom-8 fade-in duration-300 ${
           hook.toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'
